@@ -1029,26 +1029,19 @@
 
   <!-- Application Logic Scripts -->
   <script>
-    // Default Production Lambda Endpoint (auto-routes for any device on AWS Amplify)
+    // Production Default Backend Lambda URL
     const DEFAULT_LAMBDA_URL = 'https://ynahh3ednyx2ot3olmkgt6ctau0aoyxx.lambda-url.ap-southeast-2.on.aws';
-    const API_BASE = (window.__API_BASE__ || localStorage.getItem('AE_API_BASE') || (location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? '' : DEFAULT_LAMBDA_URL)).replace(/\/+$/, '');
+    
+    // Clear legacy localStorage overrides to prevent stale endpoint routing
+    try { localStorage.removeItem('AE_API_BASE'); } catch (e) {}
 
-    function configureApiBase() {
-      const current = localStorage.getItem('AE_API_BASE') || '';
-      const input = prompt(
-        'Configure Backend API Endpoint for AWS Lambda:\n\n' +
-        '• Leave empty to use default relative path (/api/*)\n' +
-        '• Or enter your AWS Lambda Function URL or API Gateway URL:\n' +
-        '  (e.g., https://xyz123.lambda-url.us-east-1.on.aws)',
-        current
-      );
-      if (input !== null) {
-        localStorage.setItem('AE_API_BASE', input.trim());
-        showToast(input.trim() ? `API endpoint set: ${input.trim()}` : 'API endpoint set to relative default.');
-        updateDocsLink();
-        setTimeout(() => location.reload(), 800);
-      }
-    }
+    // Auto-detect environment: localhost uses relative path, all production hosts use Lambda URL
+    const isLocalhost = Boolean(
+      location.hostname === 'localhost' ||
+      location.hostname === '127.0.0.1' ||
+      location.hostname === '[::1]'
+    );
+    const API_BASE = isLocalhost ? '' : DEFAULT_LAMBDA_URL;
 
     function updateDocsLink() {
       const link = document.getElementById('apiDocsLink');
