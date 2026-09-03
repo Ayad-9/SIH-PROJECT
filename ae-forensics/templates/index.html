@@ -267,13 +267,17 @@
                 Accepts RFC-822/5322 MIME (<b class="text-blue-400 font-mono">.eml</b>), Outlook Message (<b class="text-blue-400 font-mono">.msg</b>), and Plain Text Transcripts (<b class="text-blue-400 font-mono">.txt</b>).
               </p>
             </div>
-            <div class="flex flex-wrap items-center justify-center gap-2 text-xs font-mono text-slate-300 pt-2">
-              <span class="px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 shadow-xs">SHA-256 Seal</span>
-              <span class="px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 shadow-xs">Server Tracing</span>
-              <!-- Tutorial Helper Link inside Dropzone -->
-              <button type="button" onclick="event.stopPropagation(); openTutorialModal();" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-900/40 hover:bg-blue-800/60 text-blue-300 border border-blue-500/40 font-sans font-bold text-xs transition cursor-pointer">
-                <span>💡 Tutorial: How to download .eml from Gmail</span>
-                <span class="text-[10px] bg-blue-600 text-white px-1.5 py-0.2 rounded font-mono">Guide</span>
+            <div class="flex flex-wrap items-center justify-center gap-2 text-xs font-mono text-slate-300 pt-1">
+              <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 shadow-xs">SHA-256 Verified</span>
+              <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 shadow-xs">Server Tracing</span>
+            </div>
+
+            <!-- Prominent, Highly-Clickable Tutorial Action Button -->
+            <div class="pt-2">
+              <button type="button" onclick="event.stopPropagation(); openTutorialModal();" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white font-sans font-black text-xs sm:text-sm flex items-center gap-2.5 shadow-lg shadow-blue-950/80 border border-blue-400/50 ring-2 ring-blue-500/30 hover:scale-105 active:scale-95 transition-all cursor-pointer">
+                <span class="text-base sm:text-lg">💡</span>
+                <span class="tracking-wide">How to Download .EML from Gmail? (Click for Tutorial)</span>
+                <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold font-mono">↗</span>
               </button>
             </div>
           </div>
