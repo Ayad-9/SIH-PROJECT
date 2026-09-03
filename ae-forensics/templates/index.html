@@ -176,23 +176,13 @@
           <span>New Analysis</span>
         </button>
 
-        <!-- Case History Archive Drawer Button -->
-        <button onclick="toggleHistoryDrawer()" class="flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 font-bold transition shadow-sm">
+        <!-- Past Scans Drawer Button -->
+        <button onclick="toggleHistoryDrawer()" title="View previously analyzed emails" class="flex items-center gap-2 text-xs px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 font-bold transition shadow-sm active:scale-95">
           <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span>Analysis History</span>
+          <span>Past Scans</span>
         </button>
-
-
-
-        <!-- API Specs Link -->
-        <a id="apiDocsLink" href="/docs" target="_blank" class="hidden sm:flex items-center gap-1 text-xs px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold transition shadow-sm">
-          <span>API Docs</span>
-          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </a>
 
       </div>
     </div>
@@ -1009,7 +999,10 @@
     <div class="bg-slate-900 w-full max-w-md h-full shadow-2xl p-6 flex flex-col justify-between border-l border-slate-800">
       <div class="space-y-4 flex-1 overflow-y-auto">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-          <h3 class="text-base font-black text-white font-mono uppercase">Case Archive</h3>
+          <div>
+            <h3 class="text-base font-black text-white font-mono uppercase">Past Scans</h3>
+            <p class="text-xs text-slate-400">Click any email below to reload its full forensic report.</p>
+          </div>
           <button onclick="toggleHistoryDrawer()" class="text-slate-400 hover:text-white font-bold text-lg">&times;</button>
         </div>
         <div id="historyCasesList" class="space-y-2.5">
@@ -1018,7 +1011,7 @@
       </div>
       <div class="pt-4 border-t border-slate-800">
         <button onclick="toggleHistoryDrawer()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition">
-          Close Archive
+          Close
         </button>
       </div>
     </div>
@@ -1042,15 +1035,6 @@
       location.hostname === '[::1]'
     );
     const API_BASE = isLocalhost ? '' : DEFAULT_LAMBDA_URL;
-
-    function updateDocsLink() {
-      const link = document.getElementById('apiDocsLink');
-      if (link) {
-        link.href = API_BASE ? `${API_BASE}/docs` : '/docs';
-      }
-    }
-    // Set dynamic docs link on load
-    updateDocsLink();
 
     let currentCaseData = null;
     let rawHeadersCache = '';
