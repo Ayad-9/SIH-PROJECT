@@ -1,0 +1,2124 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AE-Forensics | Automated Email Threat Triage &amp; Geolocation Intelligence</title>
+  
+  <!-- Leaflet.js Mapping Engine -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Professional Typography: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#0F172A',
+              100: '#1E293B',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+              800: '#1E40AF',
+              900: '#0B0F19'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0B0F19;
+      color: #F8FAFC;
+    }
+    
+    /* High-contrast precision markers */
+    .custom-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+      border: 2px solid #FFFFFF;
+      color: #FFFFFF;
+      transition: transform 0.15s ease;
+      cursor: pointer;
+    }
+    .custom-marker:hover {
+      transform: scale(1.18);
+    }
+    .origin-pulse {
+      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.9); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Leaflet Dark Theme Overrides */
+    .leaflet-container {
+      background: #0B0F19 !important;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .leaflet-popup-content-wrapper {
+      background: #0F172A !important;
+      color: #F8FAFC !important;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    }
+    .leaflet-popup-tip {
+      background: #0F172A !important;
+    }
+    .leaflet-container a.leaflet-popup-close-button {
+      color: #94A3B8 !important;
+    }
+    .leaflet-container a.leaflet-popup-close-button:hover {
+      color: #FFFFFF !important;
+    }
+
+    /* Professional Dark Subtle Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0B0F19; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    /* Clean Tab Navigation Underlines */
+    .tab-nav-btn {
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .tab-nav-btn.active {
+      color: #60A5FA;
+      font-weight: 700;
+      background-color: #0F172A;
+      border-bottom-color: #3B82F6;
+    }
+    .tab-nav-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background-color: #3B82F6;
+      border-radius: 2px 2px 0 0;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+    }
+  </style>
+</head>
+
+<body class="bg-[#0B0F19] text-slate-100 min-h-screen font-sans antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- Enterprise Dark Header Bar -->
+  <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md sticky top-0 z-40 px-4 py-3 sm:px-8 shadow-lg">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
+      
+      <!-- Platform Branding & Classification -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white shrink-0 shadow-inner">
+          <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg sm:text-xl font-black tracking-tight text-white uppercase">
+              AE-FORENSICS
+            </h1>
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-800 text-blue-400 border border-slate-700 font-bold">
+              SIH #26106
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 font-medium">Automated Evidence &amp; Incident Triage &bull; Geolocation Intelligence</p>
+        </div>
+      </div>
+
+      <!-- Live Telemetry Badges & Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+        
+        <!-- Air-Gap Status Indicator -->
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/90 text-slate-200 border border-slate-700">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Engine: Local Air-Gap (CPU)</span>
+        </div>
+
+        <!-- Section 65B Compliance -->
+        <div class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/90 text-slate-200 border border-slate-700 font-mono">
+          <span>Sec. 65B Certified</span>
+        </div>
+
+        <!-- Reset / New Ingestion Button -->
+        <button onclick="resetWorkbench()" id="btnResetWorkbench" class="hidden text-xs px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>New Ingestion</span>
+        </button>
+
+        <!-- Case History Archive Drawer Button -->
+        <button onclick="toggleHistoryDrawer()" class="flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 font-bold transition shadow-sm">
+          <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Evidence History</span>
+        </button>
+
+        <!-- API Specs Link -->
+        <a href="/docs" target="_blank" class="hidden sm:flex items-center gap-1 text-xs px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold transition shadow-sm">
+          <span>REST API</span>
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Workspace -->
+  <main class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- Operational Workflow Bar -->
+    <section class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-sm">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 font-mono">01</div>
+          <div>
+            <div class="font-bold text-white">Message Ingestion</div>
+            <div class="text-slate-400 text-[11px] leading-relaxed">RFC-5322 MIME (.eml), Outlook (.msg), plain transcripts, or pasted raw streams.</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 border-t md:border-t-0 md:border-l border-slate-800 pt-3 md:pt-0 md:pl-4">
+          <div class="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 font-mono">02</div>
+          <div>
+            <div class="font-bold text-white">Deterministic Multi-Factor Triage</div>
+            <div class="text-slate-400 text-[11px] leading-relaxed">Protocol authentication (SPF/DKIM/DMARC), reverse SMTP hop tracing &amp; intent disambiguation.</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 border-t md:border-t-0 md:border-l border-slate-800 pt-3 md:pt-0 md:pl-4">
+          <div class="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 font-mono">03</div>
+          <div>
+            <div class="font-bold text-white">Section 65B Evidence Docket</div>
+            <div class="text-slate-400 text-[11px] leading-relaxed">Cryptographic SHA-256 custody digest, chronological relay sequence &amp; court-admissible PDF export.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Message Ingestion Terminal: Dual Mode (File Upload & Raw Text) -->
+    <section id="ingestSection" class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+      
+      <!-- Ingestion Mode Selector Tabs -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <button onclick="switchIngestMode('fileMode')" id="btnIngestFile" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-blue-600 text-white shadow-md shadow-blue-900/30">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <span>Upload Message File (.eml, .msg, .txt)</span>
+          </button>
+          <button onclick="switchIngestMode('textMode')" id="btnIngestText" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Paste Raw Stream / Headers</span>
+          </button>
+        </div>
+
+        <span class="text-xs font-mono font-medium text-slate-400">Standards: RFC 5322 &bull; RFC 2045 &bull; RFC 7208 &bull; RFC 6376</span>
+      </div>
+
+      <!-- Ingestion Mode 1: Drag & Drop Dropzone -->
+      <div id="fileModeContainer">
+        <div id="dropzone" class="border-2 border-dashed border-slate-700/80 hover:border-blue-500 rounded-2xl p-6 sm:p-10 text-center cursor-pointer transition-all bg-slate-950/50 hover:bg-slate-800/40 group">
+          <input type="file" id="fileInput" class="hidden" accept=".eml,.msg,.txt">
+          
+          <div class="flex flex-col items-center justify-center space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center group-hover:border-blue-500 transition shadow-inner">
+              <svg class="w-6 h-6 text-blue-400 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold text-white">
+                Select email evidence file or drop here
+              </h2>
+              <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+                Accepts RFC-822/5322 MIME (<b class="text-blue-400 font-mono">.eml</b>), Outlook Message (<b class="text-blue-400 font-mono">.msg</b>), and Plain Text Transcripts (<b class="text-blue-400 font-mono">.txt</b>).
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-2 text-xs font-mono text-slate-300 pt-1">
+              <span class="px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 shadow-xs">SHA-256 Seal</span>
+              <span class="px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 shadow-xs">Hop Reverse</span>
+              <span class="px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 shadow-xs">DNS Reconciled</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ingestion Mode 2: Direct Raw Stream Input -->
+      <div id="textModeContainer" class="hidden space-y-3">
+        <div class="relative">
+          <textarea id="rawTextInput" oninput="updatePasteTelemetry()" rows="6" placeholder="Paste full RFC-5322 email headers, security alert text, or forwarded email stream here...&#10;From: Security Team &lt;admin@internal-security.org&gt;&#10;To: target@enterprise.in&#10;Subject: Urgent password verification required&#10;Date: Thu, 03 Sep 2026 10:00:00 +0000&#10;&#10;Please verify your credentials immediately at https://login-verification.xyz/auth" class="w-full p-4 rounded-2xl border-2 border-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-mono text-xs text-slate-100 placeholder:text-slate-500 outline-none transition bg-slate-950 resize-y leading-relaxed"></textarea>
+        </div>
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <button onclick="analyzePastedText()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-blue-900/30 transition active:scale-95">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+              <span>Execute Analysis (Ctrl+Enter)</span>
+            </button>
+            <button onclick="clearTextBuffer()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition">
+              Clear Buffer
+            </button>
+          </div>
+          
+          <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
+            <span id="pasteStats">0 characters &bull; 0 lines</span>
+            <span>&bull;</span>
+            <span>Supports headers, MIME, or body-only text</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis In-Flight Overlay -->
+      <div id="uploadLoader" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-50">
+        <div class="bg-slate-900 p-6 rounded-3xl shadow-2xl flex flex-col items-center space-y-3 border border-slate-700">
+          <div class="w-10 h-10 border-3 border-slate-700 border-t-blue-500 rounded-full animate-spin"></div>
+          <p class="text-xs font-mono font-bold text-white tracking-wider">EXECUTING FORENSIC EVALUATION PIPELINE...</p>
+        </div>
+      </div>
+
+      <!-- Reference Incident Verification Cases (SOC Queues) -->
+      <div class="pt-3 border-t border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 font-mono">
+            <span>REFERENCE INCIDENTS:</span>
+          </span>
+          <span class="text-[11px] text-slate-400 font-medium">Click case record to load evidence stream</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+          
+          <!-- Case 1: Infrastructure Advisory -->
+          <button onclick="loadSample('clean')" class="p-3 rounded-xl bg-emerald-950/40 hover:bg-emerald-950/70 border border-emerald-700/60 text-left transition flex flex-col justify-between shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-emerald-300 font-mono">INC-2026-0811</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500 text-slate-950 font-black font-mono">BENIGN</span>
+            </div>
+            <div class="text-[11px] text-emerald-200/90 mt-1 font-medium leading-snug">Authorized Google Workspace infrastructure; passing cryptographic authentication.</div>
+          </button>
+
+          <!-- Case 2: Workplace Dispute -->
+          <button onclick="loadSample('angry_complaint')" class="p-3 rounded-xl bg-amber-950/40 hover:bg-amber-950/70 border border-amber-700/60 text-left transition flex flex-col justify-between shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-amber-300 font-mono">INC-2026-0814</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-black font-mono">DISPUTE</span>
+            </div>
+            <div class="text-[11px] text-amber-200/90 mt-1 font-medium leading-snug">Aggressive customer dissatisfaction. Disambiguated as non-threat dispute.</div>
+          </button>
+
+          <!-- Case 3: BEC Wire Transfer -->
+          <button onclick="loadSample('bec')" class="p-3 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 border border-rose-700/60 text-left transition flex flex-col justify-between shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-rose-300 font-mono">INC-2026-0819</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-rose-600 text-white font-black font-mono">MALICIOUS</span>
+            </div>
+            <div class="text-[11px] text-rose-200/90 mt-1 font-medium leading-snug">CFO identity impersonation with wire routing modification via Tor exit relay.</div>
+          </button>
+
+          <!-- Case 4: MFA Phishing -->
+          <button onclick="loadSample('phishing')" class="p-3 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 border border-rose-700/60 text-left transition flex flex-col justify-between shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-rose-300 font-mono">INC-2026-0822</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-rose-600 text-white font-black font-mono">MALICIOUS</span>
+            </div>
+            <div class="text-[11px] text-rose-200/90 mt-1 font-medium leading-snug">Spoofed O365 account expiration alert harvesting corporate credentials.</div>
+          </button>
+
+          <!-- Case 5: Display Name Spoof -->
+          <button onclick="loadSample('spoof')" class="p-3 rounded-xl bg-purple-950/40 hover:bg-purple-950/70 border border-purple-700/60 text-left transition flex flex-col justify-between shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-purple-300 font-mono">INC-2026-0825</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-600 text-white font-black font-mono">SUSPICIOUS</span>
+            </div>
+            <div class="text-[11px] text-purple-200/90 mt-1 font-medium leading-snug">CEO display header mismatch originating from external freemail account.</div>
+          </button>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Forensic Triage Results Workspace -->
+    <div id="resultsWorkspace" class="hidden space-y-6">
+
+      <!-- Action & Docket Reference Bar -->
+      <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-wrap justify-between items-center gap-4 shadow-sm">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs font-mono px-2.5 py-0.5 rounded bg-blue-600 text-white font-bold">CASE DOCKET</span>
+            <h2 id="caseRefTitle" class="text-lg sm:text-xl font-black text-white font-mono tracking-tight">CASE-9901</h2>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 font-bold">Section 65B Generated</span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-400 font-medium">Chain of custody verified. Deterministic multi-factor triage completed.</p>
+        </div>
+
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <!-- Primary Detailed PDF Report Download Button -->
+          <button onclick="downloadPdfReport()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-blue-900/30 transition active:scale-95">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Download Section 65B PDF Dossier</span>
+          </button>
+
+          <!-- Preview PDF in Browser Tab -->
+          <button onclick="previewPdfReport()" title="Preview PDF in New Window" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs flex items-center gap-1.5 transition">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            <span>Preview</span>
+          </button>
+
+          <!-- Quick IOC Export Modal Trigger -->
+          <button onclick="toggleIocModal()" title="Export IOCs for SIEM / Firewall" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs flex items-center gap-1.5 transition">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Export IOCs</span>
+          </button>
+
+          <!-- Copy SHA-256 Digest Button -->
+          <button onclick="copyEvidenceHash()" title="Copy Cryptographic SHA-256 Digest" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Diagnostic Telemetry Cards (4 Columns) -->
+      <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <!-- Card 1: Overall Threat Verdict & Score -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">THREAT CLASSIFICATION</span>
+            <span id="verdictPill" class="text-xs font-mono font-extrabold px-3 py-0.5 rounded uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+              PENDING
+            </span>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex items-baseline gap-2">
+              <span id="scoreNumber" class="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white">0.0</span>
+              <span class="text-xs font-mono text-slate-500 font-bold">/ 100</span>
+            </div>
+            <!-- Score Gauge -->
+            <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+              <div id="scoreBar" class="h-2 rounded-full bg-slate-700 transition-all duration-700" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800 text-xs text-slate-400 leading-snug">
+            <span id="verdictSummary" class="font-medium text-slate-300">Awaiting triage...</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Sender Attribution & Alignment -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">SENDER ATTRIBUTION</span>
+            <span id="spoofBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">ALIGNED</span>
+          </div>
+
+          <div class="space-y-1.5 text-xs">
+            <div>
+              <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Declared Sender:</span>
+              <span id="senderDisplay" class="font-mono font-bold text-slate-100 truncate block">-</span>
+            </div>
+            <div>
+              <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Authenticated Domain:</span>
+              <span id="domainDisplay" class="font-mono font-extrabold text-blue-400 truncate block">-</span>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 font-mono">
+            <span>Timestamp: <span id="dateDisplay" class="text-slate-200 font-bold truncate">N/A</span></span>
+          </div>
+        </div>
+
+        <!-- Card 3: Geolocation & Network Origin -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">ORIGIN INFRASTRUCTURE</span>
+            <span id="proxyBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">DIRECT ISP</span>
+          </div>
+
+          <div class="space-y-1.5 text-xs">
+            <div>
+              <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Origin IP:</span>
+              <span id="originIpDisplay" class="font-mono font-extrabold text-white text-sm">0.0.0.0</span>
+            </div>
+            <div>
+              <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Physical Location:</span>
+              <span id="originLocationDisplay" class="font-bold text-slate-200 truncate block">Unknown</span>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 font-mono">
+            <span>ASN: <span id="originOrgDisplay" class="text-slate-200 font-bold truncate max-w-[140px]">Gateway</span></span>
+          </div>
+        </div>
+
+        <!-- Card 4: Protocol Authentication Matrix -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">SECURITY PROTOCOLS</span>
+            <span class="text-[10px] font-mono text-slate-500 font-bold">RFC Standards</span>
+          </div>
+
+          <div class="space-y-1 text-xs font-mono">
+            <div class="flex justify-between items-center pb-1 border-b border-slate-800">
+              <span class="text-slate-400">SPF Record</span>
+              <span id="spfBadge" class="font-bold px-1.5 py-0.2 rounded text-[11px]">-</span>
+            </div>
+            <div class="flex justify-between items-center pb-1 border-b border-slate-800">
+              <span class="text-slate-400">DKIM Signature</span>
+              <span id="dkimBadge" class="font-bold px-1.5 py-0.2 rounded text-[11px]">-</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400">DMARC Policy</span>
+              <span id="dmarcBadge" class="font-bold px-1.5 py-0.2 rounded text-[11px]">-</span>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 font-mono">
+            <span>Hops: <span id="hopCountDisplay" class="text-slate-200 font-bold">0</span></span>
+            <span>NLP Threat: <span id="nlpPercentDisplay" class="text-blue-400 font-bold">0%</span></span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Transmission Geolocation Map Section (Compact 160-180px Preview, Non-Interfering) -->
+      <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3 shadow-sm">
+        
+        <!-- Map Header & Top Controls -->
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+              <h3 class="text-sm sm:text-base font-black text-white">Transmission Hop Geolocation Route</h3>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-mono">
+                OpenStreetMap
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 font-medium mt-0.5">
+              Reconstructed SMTP transmission route. Click 'Explore Map Freely' for full 360-degree interactive viewer.
+            </p>
+          </div>
+
+          <!-- Action Controls in Map Header -->
+          <div class="flex items-center gap-2 flex-wrap">
+            
+            <!-- Free Map Providers Switcher -->
+            <div class="flex items-center bg-slate-950 rounded-xl p-0.5 border border-slate-800 text-xs font-bold font-mono">
+              <button onclick="setMapLayer('osm')" id="btnLayerOsm" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-2xs font-bold">
+                OSM (Free)
+              </button>
+              <button onclick="setMapLayer('esri')" id="btnLayerEsri" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+                Esri Streets
+              </button>
+              <button onclick="setMapLayer('satellite')" id="btnLayerSatellite" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+                Satellite
+              </button>
+              <button onclick="setMapLayer('voyager')" id="btnLayerVoyager" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+                Voyager
+              </button>
+            </div>
+
+            <!-- Fit Route -->
+            <button onclick="resetMapView()" class="text-xs px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition font-bold shadow-xs" title="Fit map view to include all hops">
+              Fit Route
+            </button>
+
+            <!-- Dedicated Explore Screen Button -->
+            <button onclick="openMapModal()" class="text-xs px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center gap-1.5 shadow-md shadow-blue-900/30 transition active:scale-95">
+              <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              </svg>
+              <span>Explore Map Freely</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Hop Navigation Pills -->
+        <div id="hopPillsContainer" class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          <!-- Hop buttons inserted dynamically -->
+        </div>
+
+        <!-- Compact Map Container (140px mobile, 160px desktop - Never captures mouse wheel or page swipe) -->
+        <div id="mapWrapper" class="relative rounded-2xl overflow-hidden border border-slate-800 shadow-inner bg-slate-950 transition-all">
+          
+          <!-- Map Canvas -->
+          <div id="map" class="h-[140px] sm:h-[160px] w-full z-0"></div>
+
+          <!-- On-Map Zoom Controls (+ and - INSIDE the map screen, top-right) -->
+          <div class="absolute top-2 right-2 z-20 flex flex-col gap-1 shadow-sm">
+            <button onclick="zoomInMap()" title="Zoom in (+)" class="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-white border border-slate-700 font-bold text-sm flex items-center justify-center transition shadow-xs active:scale-95">
+              +
+            </button>
+            <button onclick="zoomOutMap()" title="Zoom out (-)" class="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-white border border-slate-700 font-bold text-sm flex items-center justify-center transition shadow-xs active:scale-95">
+              &minus;
+            </button>
+          </div>
+
+          <!-- On-Map "Explore Screen" Pill (INSIDE the map screen, top-left) -->
+          <div class="absolute top-2 left-2 z-20">
+            <button onclick="openMapModal()" class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm bg-slate-900/90 hover:bg-slate-800 text-blue-400 border border-slate-700 active:scale-95">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+              <span>Open Interactive Screen</span>
+            </button>
+          </div>
+
+          <!-- On-Map Status Helper Pill (Bottom-left) -->
+          <div class="absolute bottom-2 left-2 z-20 bg-slate-950/90 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] font-mono text-slate-300 flex items-center gap-1.5 pointer-events-none border border-slate-800">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span>Page Scroll Unlocked &bull; Click to Explore</span>
+          </div>
+
+          <!-- Direct Endpoint Banner (When 0 Public Hops Detected) -->
+          <div id="noHopsBanner" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-2xs flex items-center justify-center p-4 z-10">
+            <div class="bg-slate-900/95 rounded-xl px-4 py-2 text-center text-xs font-mono font-bold text-slate-200 border border-slate-700 shadow-lg">
+              Direct Endpoint / Single-Hop Transmission (No intermediate public relays in trace)
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- Chronological Transmission Relay Chain Table -->
+      <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3 shadow-sm">
+        <div class="flex justify-between items-center flex-wrap gap-2">
+          <div>
+            <h3 class="text-sm font-black text-white uppercase font-mono">SMTP Transmission Relay Sequence</h3>
+            <p class="text-xs text-slate-400 font-medium">Chronological hop chain reconstructed from RFC Received headers (physical origin to destination MX).</p>
+          </div>
+          <span class="text-xs font-mono font-semibold text-blue-400">Click any row to inspect hop on map</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold border-b border-slate-800">
+              <tr>
+                <th class="py-2.5 px-3">Hop</th>
+                <th class="py-2.5 px-3">Relay IP</th>
+                <th class="py-2.5 px-3">Type</th>
+                <th class="py-2.5 px-3">Claimed Host</th>
+                <th class="py-2.5 px-3">Location</th>
+                <th class="py-2.5 px-3">Latency</th>
+                <th class="py-2.5 px-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="hopsTableBody" class="divide-y divide-slate-800 text-slate-200 font-medium">
+              <!-- Rendered rows -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Investigation Telemetry & Evidence Artifacts (Modern Tabbed Strip) -->
+      <section class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-sm">
+        
+        <!-- Integrated Sleek Tab Header Strip -->
+        <div class="border-b border-slate-800 bg-slate-950 px-4 pt-3 flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center overflow-x-auto space-x-1 sm:space-x-2 text-xs font-semibold">
+            
+            <!-- Tab 1: Email Body -->
+            <button onclick="switchTab('inboxTab')" id="tabBtn-inboxTab" class="tab-nav-btn active px-4 py-2.5 rounded-t-xl text-blue-400 flex items-center gap-2 border-b-2 border-blue-500">
+              <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              <span>Email Content &amp; IOCs</span>
+            </button>
+
+            <!-- Tab 2: Intent & Tone Analysis -->
+            <button onclick="switchTab('toneTab')" id="tabBtn-toneTab" class="tab-nav-btn px-4 py-2.5 rounded-t-xl text-slate-400 hover:text-slate-200 flex items-center gap-2 border-b-2 border-transparent">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              <span>Intent &amp; Tone</span>
+            </button>
+
+            <!-- Tab 3: Privacy & Tor -->
+            <button onclick="switchTab('proxyTab')" id="tabBtn-proxyTab" class="tab-nav-btn px-4 py-2.5 rounded-t-xl text-slate-400 hover:text-slate-200 flex items-center gap-2 border-b-2 border-transparent">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <span>Routing Privacy &amp; Tor</span>
+            </button>
+
+            <!-- Tab 4: Raw RFC Headers -->
+            <button onclick="switchTab('headersTab')" id="tabBtn-headersTab" class="tab-nav-btn px-4 py-2.5 rounded-t-xl text-slate-400 hover:text-slate-200 flex items-center gap-2 border-b-2 border-transparent">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+              <span>RFC-5322 Headers</span>
+            </button>
+
+            <!-- Tab 5: Section 65B Legal Exhibit -->
+            <button onclick="switchTab('courtTab')" id="tabBtn-courtTab" class="tab-nav-btn px-4 py-2.5 rounded-t-xl text-slate-400 hover:text-slate-200 flex items-center gap-2 border-b-2 border-transparent">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span>Section 65B Exhibit</span>
+            </button>
+
+          </div>
+
+          <div class="hidden sm:flex items-center gap-1.5 text-xs font-mono text-slate-400 pb-2">
+            <span>Investigation Dossier</span>
+          </div>
+        </div>
+
+        <!-- Section 1: Message Content & Extracted URLs -->
+        <div id="inboxTab" class="p-5 sm:p-6 space-y-5">
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
+            
+            <!-- Email Header Metadata -->
+            <div class="flex flex-wrap justify-between items-start gap-3 pb-3 border-b border-slate-800">
+              <div class="space-y-1">
+                <h4 id="inboxSubject" class="text-base font-black text-white">Subject Line</h4>
+                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-300">
+                  <span>From: <b id="inboxSender" class="text-blue-400 font-mono"></b></span>
+                  <span>&bull;</span>
+                  <span>Domain: <b id="inboxDomain" class="text-slate-100 font-mono font-bold"></b></span>
+                </div>
+              </div>
+
+              <!-- Security Status Ribbon -->
+              <div id="inboxSecurityRibbon" class="px-3 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 bg-emerald-950 text-emerald-300 border border-emerald-800">
+                <span>[VERIFIED AUTHENTIC TRANSMISSION]</span>
+              </div>
+            </div>
+
+            <!-- Email Body Content Viewer -->
+            <div class="space-y-2">
+              <div class="flex justify-between items-center text-xs text-slate-400 font-semibold font-mono">
+                <span>DECODED MESSAGE BODY:</span>
+                <span>Plain Text &bull; RFC Compliant</span>
+              </div>
+              <div id="inboxBodyViewer" class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-sm text-slate-200 whitespace-pre-wrap leading-relaxed max-h-[300px] overflow-y-auto font-sans shadow-inner">
+                No message body loaded.
+              </div>
+            </div>
+
+            <!-- Extracted URLs & Hyperlinks Table (Critical SOC Capability) -->
+            <div class="space-y-2 pt-2">
+              <div class="flex justify-between items-center text-xs font-mono font-semibold text-slate-300">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                  <span>EXTRACTED HYPERLINKS &amp; IOC TARGETS (<span id="urlCountBadge">0</span>)</span>
+                </span>
+                <span class="text-slate-500">Inspected for credential harvesting patterns</span>
+              </div>
+              <div id="urlsTableContainer" class="bg-slate-950 rounded-xl border border-slate-800 overflow-hidden shadow-xs">
+                <table class="w-full text-left text-xs font-mono">
+                  <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] font-bold border-b border-slate-800">
+                    <tr>
+                      <th class="py-2 px-3">Hyperlink URL Target</th>
+                      <th class="py-2 px-3">Risk Assessment</th>
+                      <th class="py-2 px-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="urlsTableBody" class="divide-y divide-slate-850 text-slate-200">
+                    <tr><td colspan="3" class="text-center py-3 text-slate-500 font-sans">No embedded hyperlinks detected.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Bottom Guided Transition -->
+            <div class="flex justify-between items-center pt-3 border-t border-slate-800 text-xs">
+              <span class="text-slate-500 font-mono">Panel 1 of 5</span>
+              <button onclick="switchTab('toneTab')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center gap-1.5 shadow-sm transition">
+                <span>Next: Intent &amp; Tone Analysis</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Section 2: Intent & Tone Disambiguation -->
+        <div id="toneTab" class="hidden p-5 sm:p-6 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Disambiguation Finding -->
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-3">
+              <h4 class="text-sm font-bold text-white flex items-center gap-2 font-mono uppercase">
+                Workplace Dispute vs. Cyber Threat Disambiguation
+              </h4>
+              <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                Standard perimeter filters frequently misclassify aggressive customer disputes as phishing attacks. The AE-Forensics heuristic model isolates legitimate workplace complaints from authentic cybercrime vectors (wire transfer diversion, credential harvesting, malware delivery).
+              </p>
+              <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200">
+                <b class="text-slate-400 block mb-1 font-mono uppercase text-[10px]">Heuristic Disambiguation Finding:</b>
+                <span id="toneDeepExplanation" class="font-medium">Evaluating semantic indicators...</span>
+              </div>
+            </div>
+
+            <!-- Hostile & Deceptive Tokens -->
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-3">
+              <h4 class="text-sm font-bold text-white flex items-center gap-2 font-mono uppercase">
+                Matched Emotion &amp; Aggression Lexicon Terms
+              </h4>
+              <div id="toneLexiconContainer" class="flex flex-wrap gap-2 pt-1">
+                <!-- Matches injected dynamically -->
+              </div>
+              <div class="pt-2 border-t border-slate-800 text-xs text-slate-400 flex justify-between font-mono">
+                <span>Hostility Filter: <b id="abuseFilterDisplay" class="text-slate-200">None</b></span>
+                <span>Semantic Fraud: <b id="fraudIntentDisplay" class="text-emerald-400">0%</b></span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Guided Transition -->
+          <div class="flex justify-between items-center pt-2 text-xs">
+            <button onclick="switchTab('inboxTab')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold transition">
+              &larr; Back: Email Content
+            </button>
+            <button onclick="switchTab('proxyTab')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center gap-1.5 shadow-sm transition">
+              <span>Next: Routing Privacy &amp; Tor</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 3: Routing Privacy & Tor Audit -->
+        <div id="proxyTab" class="hidden p-5 sm:p-6 space-y-4">
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div class="flex justify-between items-center flex-wrap gap-2">
+              <h4 class="text-sm font-bold text-white font-mono uppercase">
+                Routing Privacy, Anonymizer &amp; Proxy Header Audit
+              </h4>
+              <span id="privacyAuditBadge" class="text-xs font-mono font-bold px-3 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">
+                DIRECT TRANSMISSION (AUTHENTICATED GATEWAY)
+              </span>
+            </div>
+            <div id="proxyAuditDetails" class="space-y-2 text-xs pt-1">
+              <!-- Indicators -->
+            </div>
+          </div>
+
+          <!-- Bottom Guided Transition -->
+          <div class="flex justify-between items-center pt-2 text-xs">
+            <button onclick="switchTab('toneTab')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold transition">
+              &larr; Back: Intent &amp; Tone
+            </button>
+            <button onclick="switchTab('headersTab')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center gap-1.5 shadow-sm transition">
+              <span>Next: Raw RFC Headers</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 4: Raw RFC-5322 Headers -->
+        <div id="headersTab" class="hidden p-5 sm:p-6 space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-mono font-bold text-slate-300">RAW RFC-5322 HEADER STREAM</span>
+            <button onclick="copyRawHeaders()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold transition shadow-xs">
+              Copy Full Headers
+            </button>
+          </div>
+          <pre id="rawHeadersViewer" class="bg-slate-950 border border-slate-800 text-slate-200 p-4 rounded-2xl text-xs font-mono max-h-[380px] overflow-y-auto leading-relaxed whitespace-pre-wrap selection:bg-blue-600"></pre>
+
+          <!-- Bottom Guided Transition -->
+          <div class="flex justify-between items-center pt-2 text-xs">
+            <button onclick="switchTab('proxyTab')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold transition">
+              &larr; Back: Routing Privacy
+            </button>
+            <button onclick="switchTab('courtTab')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center gap-1.5 shadow-sm transition">
+              <span>Next: Section 65B Legal Exhibit</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 5: Section 65B Legal Exhibit -->
+        <div id="courtTab" class="hidden p-5 sm:p-6 space-y-4">
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div class="flex justify-between items-center flex-wrap gap-2">
+              <div>
+                <h4 class="text-sm font-bold text-white font-mono uppercase">Section 65B Indian Evidence Act Legal Exhibit (JSON)</h4>
+                <p class="text-xs text-slate-400">Cryptographically signed digital record suitable for judicial submission.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="copyCourtJson()" class="text-xs px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold transition shadow-xs">
+                  Copy JSON
+                </button>
+                <button onclick="downloadPdfReport()" class="text-xs px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition shadow-sm">
+                  Download Official PDF Dossier
+                </button>
+              </div>
+            </div>
+            <pre id="courtPackageJson" class="bg-slate-950 border border-slate-800 text-slate-200 p-4 rounded-xl text-xs font-mono max-h-[380px] overflow-y-auto selection:bg-blue-600"></pre>
+          </div>
+
+          <!-- Bottom Guided Transition -->
+          <div class="flex justify-between items-center pt-2 text-xs">
+            <button onclick="switchTab('headersTab')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold transition">
+              &larr; Back: Raw Headers
+            </button>
+            <button onclick="downloadPdfReport()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center gap-1.5 shadow-sm transition">
+              <span>Export Certified PDF Report</span>
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Dedicated Map Route Exploration Screen (Balanced Landscape Aspect Ratio) -->
+  <div id="mapModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 p-2 sm:p-6 flex flex-col justify-center items-center">
+    <div class="bg-slate-900 w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-slate-700" style="max-height: 84vh;">
+      
+      <!-- Explorer Modal Header -->
+      <div class="p-3.5 sm:p-4 border-b border-slate-800 flex flex-wrap justify-between items-center gap-2.5 bg-slate-950">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 text-white flex items-center justify-center font-bold text-xs shrink-0">
+            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm sm:text-base font-black text-white">Transmission Hop Geolocation Explorer</h3>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-blue-400 border border-slate-700 font-mono">
+                360° Free Navigation Active
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400 font-medium">Pan, swipe, and zoom freely &bull; Click relay markers for details</p>
+          </div>
+        </div>
+
+        <!-- Controls inside Modal Header -->
+        <div class="flex items-center gap-2 flex-wrap">
+          
+          <!-- Free Layer Switcher -->
+          <div class="flex items-center bg-slate-900 rounded-xl p-0.5 border border-slate-750 text-xs font-bold font-mono">
+            <button onclick="setModalMapLayer('osm')" id="btnModalLayerOsm" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-2xs font-bold">
+              OSM (Free)
+            </button>
+            <button onclick="setModalMapLayer('esri')" id="btnModalLayerEsri" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+              Esri Streets
+            </button>
+            <button onclick="setModalMapLayer('satellite')" id="btnModalLayerSatellite" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+              Satellite
+            </button>
+            <button onclick="setModalMapLayer('voyager')" id="btnModalLayerVoyager" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+              Voyager
+            </button>
+          </div>
+
+          <!-- Fit Route -->
+          <button onclick="resetModalMapView()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition shadow-xs">
+            Fit Route
+          </button>
+
+          <!-- Close Button -->
+          <button onclick="closeMapModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition shadow-xs">
+            <span>&times;</span> <span>Close &amp; Return</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hop Quick-Jump Bar inside Modal -->
+      <div id="modalHopPillsContainer" class="flex items-center gap-2 overflow-x-auto p-2 bg-slate-950/90 border-b border-slate-800 text-xs shrink-0">
+        <!-- Injected hop jump pills -->
+      </div>
+
+      <!-- Explorer Map Canvas (Balanced Landscape Aspect Ratio) -->
+      <div class="relative w-full overflow-hidden bg-slate-950 flex-1" style="height: 52vh; max-height: 480px; min-height: 280px;">
+        <div id="modalMap" class="w-full h-full z-0"></div>
+
+        <!-- Floating On-Map Zoom Buttons Inside Modal -->
+        <div class="absolute top-3 right-3 z-20 flex flex-col gap-1 shadow-md">
+          <button onclick="zoomInModalMap()" title="Zoom In" class="w-8 h-8 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white border border-slate-700 font-bold text-base flex items-center justify-center transition shadow-xs active:scale-95">
+            +
+          </button>
+          <button onclick="zoomOutModalMap()" title="Zoom Out" class="w-8 h-8 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white border border-slate-700 font-bold text-base flex items-center justify-center transition shadow-xs active:scale-95">
+            &minus;
+          </button>
+        </div>
+
+        <!-- Active Gesture Pill -->
+        <div class="absolute bottom-3 left-3 z-20 bg-slate-950/90 backdrop-blur-xs px-3 py-1 rounded-lg text-xs font-mono text-white border border-slate-800 flex items-center gap-2 pointer-events-none">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span>Pan, Swipe, and Pinch/Wheel Zoom Active</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Quick IOCs Export Modal -->
+  <div id="iocModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 p-4 flex items-center justify-center">
+    <div class="bg-slate-900 w-full max-w-xl rounded-3xl overflow-hidden shadow-2xl border border-slate-700 p-5 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base font-black text-white font-mono uppercase">Extracted Indicators of Compromise (IOCs)</h3>
+          <p class="text-xs text-slate-400 font-medium">Ready for ingest into SIH, SIEM, or firewall blocklists.</p>
+        </div>
+        <button onclick="toggleIocModal()" class="text-slate-400 hover:text-white font-bold text-xl">&times;</button>
+      </div>
+
+      <div class="space-y-2">
+        <textarea id="iocExportText" rows="9" readonly class="w-full p-3.5 bg-slate-950 text-slate-200 font-mono text-xs rounded-xl border border-slate-800 leading-relaxed resize-none"></textarea>
+      </div>
+
+      <div class="flex justify-between items-center pt-2">
+        <span class="text-xs text-slate-400 font-mono">Format: STIX / Plain-Text Attributes</span>
+        <button onclick="copyIocText()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-sm">
+          Copy All IOCs
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historical Cases Drawer (Slide-out) -->
+  <div id="historyDrawer" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex justify-end">
+    <div class="bg-slate-900 w-full max-w-md h-full shadow-2xl p-6 flex flex-col justify-between border-l border-slate-800">
+      <div class="space-y-4 flex-1 overflow-y-auto">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <h3 class="text-base font-black text-white font-mono uppercase">Case Archive</h3>
+          <button onclick="toggleHistoryDrawer()" class="text-slate-400 hover:text-white font-bold text-lg">&times;</button>
+        </div>
+        <div id="historyCasesList" class="space-y-2.5">
+          <!-- Cases injected dynamically -->
+        </div>
+      </div>
+      <div class="pt-4 border-t border-slate-800">
+        <button onclick="toggleHistoryDrawer()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition">
+          Close Archive
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Application Logic Scripts -->
+  <script>
+    let currentCaseData = null;
+    let rawHeadersCache = '';
+    let map = null;
+    let modalMap = null;
+    let mapMarkers = [];
+    let modalMarkers = [];
+    let mapPolyline = null;
+    let modalPolyline = null;
+    let currentMapStyle = 'osm'; // Default to OpenStreetMap (100% Free & Open-Source)
+    let currentModalMapStyle = 'osm';
+
+    // 100% Free & Fast Map Providers (No API keys required, zero rate-limit blocks)
+    const MAP_PROVIDERS = {
+      osm: {
+        url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        options: {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" style="color: #93C5FD;">OpenStreetMap</a> contributors'
+        }
+      },
+      esri: {
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        options: {
+          maxZoom: 19,
+          attribution: 'Tiles &copy; Esri &bull; Free Global Streets'
+        }
+      },
+      satellite: {
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        options: {
+          maxZoom: 19,
+          attribution: 'Tiles &copy; Esri World Imagery (Satellite)'
+        }
+      },
+      voyager: {
+        url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+        options: {
+          maxZoom: 19,
+          subdomains: 'abcd',
+          attribution: '&copy; CARTO (Voyager)'
+        }
+      }
+    };
+
+    let baseTileLayer = null;
+    let modalTileLayer = null;
+
+    // DOM Elements
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadLoader = document.getElementById('uploadLoader');
+    const resultsWorkspace = document.getElementById('resultsWorkspace');
+
+    // Ingest Mode Switcher (File vs Raw Text)
+    function switchIngestMode(mode) {
+      const fileBtn = document.getElementById('btnIngestFile');
+      const textBtn = document.getElementById('btnIngestText');
+      const fileCont = document.getElementById('fileModeContainer');
+      const textCont = document.getElementById('textModeContainer');
+
+      if (mode === 'fileMode') {
+        fileBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-blue-600 text-white shadow-md shadow-blue-900/30';
+        textBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700';
+        fileCont.classList.remove('hidden');
+        textCont.classList.add('hidden');
+      } else {
+        textBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-blue-600 text-white shadow-md shadow-blue-900/30';
+        fileBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700';
+        textCont.classList.remove('hidden');
+        fileCont.classList.add('hidden');
+        document.getElementById('rawTextInput').focus();
+      }
+    }
+
+    // Live update of paste text telemetry
+    function updatePasteTelemetry() {
+      const text = document.getElementById('rawTextInput').value;
+      const chars = text.length;
+      const lines = text ? text.split('\n').length : 0;
+      document.getElementById('pasteStats').innerText = `${chars} characters • ${lines} lines`;
+    }
+
+    function clearTextBuffer() {
+      document.getElementById('rawTextInput').value = '';
+      updatePasteTelemetry();
+    }
+
+    // Reset current workbench state
+    function resetWorkbench() {
+      currentCaseData = null;
+      rawHeadersCache = '';
+      resultsWorkspace.classList.add('hidden');
+      document.getElementById('btnResetWorkbench').classList.add('hidden');
+      document.getElementById('ingestSection').scrollIntoView({ behavior: 'smooth' });
+      showToast('Workbench reset. Ready for new ingestion.');
+    }
+
+    // Keyboard shortcut: Ctrl+Enter in textarea executes analysis
+    document.getElementById('rawTextInput').addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        analyzePastedText();
+      }
+    });
+
+    // Escape key closes modals
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMapModal();
+        const drawer = document.getElementById('historyDrawer');
+        if (drawer && !drawer.classList.contains('hidden')) drawer.classList.add('hidden');
+        const iocModal = document.getElementById('iocModal');
+        if (iocModal && !iocModal.classList.contains('hidden')) iocModal.classList.add('hidden');
+      }
+    });
+
+    // Drag-and-Drop Event Handlers
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('border-blue-500', 'bg-slate-800/60');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('border-blue-500', 'bg-slate-800/60');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-blue-500', 'bg-slate-800/60');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) handleFileUpload(files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleFileUpload(e.target.files[0]);
+    });
+
+    async function handleFileUpload(file) {
+      if (!file) return;
+      uploadLoader.classList.remove('hidden');
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) throw new Error('Analysis request failed: ' + response.statusText);
+        const data = await response.json();
+        renderAnalysis(data);
+        showToast('Forensic evaluation pipeline complete.');
+      } catch (err) {
+        alert('Analysis Error: ' + err.message);
+      } finally {
+        uploadLoader.classList.add('hidden');
+      }
+    }
+
+    async function analyzePastedText() {
+      const rawText = document.getElementById('rawTextInput').value.trim();
+      if (!rawText) {
+        showToast('Please paste email headers or text before analyzing.');
+        document.getElementById('rawTextInput').focus();
+        return;
+      }
+
+      uploadLoader.classList.remove('hidden');
+      try {
+        const response = await fetch('/api/analyze-text', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ raw_text: rawText, filename: 'stream_input.eml' })
+        });
+        if (!response.ok) throw new Error('Analysis request failed: ' + response.statusText);
+        const data = await response.json();
+        renderAnalysis(data);
+        showToast('Pasted stream evaluated successfully.');
+      } catch (err) {
+        alert('Analysis Error: ' + err.message);
+      } finally {
+        uploadLoader.classList.add('hidden');
+      }
+    }
+
+    async function loadSample(sampleType) {
+      uploadLoader.classList.remove('hidden');
+      try {
+        const response = await fetch(`/api/sample/${sampleType}`);
+        if (!response.ok) throw new Error('Failed to retrieve case: ' + response.statusText);
+        const data = await response.json();
+        renderAnalysis(data);
+        showToast(`Loaded reference incident docket: ${sampleType.toUpperCase()}`);
+      } catch (err) {
+        alert('Error loading docket: ' + err.message);
+      } finally {
+        uploadLoader.classList.add('hidden');
+      }
+    }
+
+    // Render Forensic Data on Dashboard
+    function renderAnalysis(data) {
+      currentCaseData = data;
+      rawHeadersCache = data.raw_headers || '';
+      resultsWorkspace.classList.remove('hidden');
+      document.getElementById('btnResetWorkbench').classList.remove('hidden');
+
+      // 1. Case Reference Title
+      document.getElementById('caseRefTitle').innerText = `CASE-${(data.case_id || 'UNKNOWN').substring(0, 8).toUpperCase()}`;
+
+      // 2. Verdict & Score Gauge
+      const score = parseFloat(data.threat_score) || 0;
+      const scoreNum = document.getElementById('scoreNumber');
+      const scoreBar = document.getElementById('scoreBar');
+      const pill = document.getElementById('verdictPill');
+
+      scoreNum.innerText = score.toFixed(1);
+      scoreBar.style.width = Math.min(100, Math.max(0, score)) + '%';
+      pill.innerText = data.verdict;
+
+      if (data.verdict === 'MALICIOUS') {
+        pill.className = 'text-xs font-mono font-extrabold px-3 py-0.5 rounded uppercase tracking-wider bg-rose-950 text-rose-300 border border-rose-700 shadow-sm';
+        scoreBar.className = 'h-2 rounded-full bg-rose-600 transition-all duration-700';
+        scoreNum.className = 'text-4xl sm:text-5xl font-black font-mono tracking-tight text-rose-500';
+      } else if (data.verdict === 'SUSPICIOUS') {
+        pill.className = 'text-xs font-mono font-extrabold px-3 py-0.5 rounded uppercase tracking-wider bg-amber-950 text-amber-300 border border-amber-700 shadow-sm';
+        scoreBar.className = 'h-2 rounded-full bg-amber-500 transition-all duration-700';
+        scoreNum.className = 'text-4xl sm:text-5xl font-black font-mono tracking-tight text-amber-400';
+      } else {
+        pill.className = 'text-xs font-mono font-extrabold px-3 py-0.5 rounded uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-700 shadow-sm';
+        scoreBar.className = 'h-2 rounded-full bg-emerald-600 transition-all duration-700';
+        scoreNum.className = 'text-4xl sm:text-5xl font-black font-mono tracking-tight text-emerald-400';
+      }
+
+      document.getElementById('verdictSummary').innerText = data.verdict_desc || 'Triage completed.';
+
+      // 3. Sender Identity
+      document.getElementById('senderDisplay').innerText = data.sender || 'Unknown';
+      document.getElementById('domainDisplay').innerText = data.sender_domain || 'unknown';
+      document.getElementById('dateDisplay').innerText = data.received_date ? data.received_date.substring(0, 22) : 'N/A';
+
+      const isSpoofed = data.is_display_spoofed;
+      const spoofBadge = document.getElementById('spoofBadge');
+      if (isSpoofed) {
+        spoofBadge.innerText = 'DISPLAY SPOOF DETECTED';
+        spoofBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800';
+      } else {
+        spoofBadge.innerText = 'ALIGNED';
+        spoofBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800';
+      }
+
+      // 4. Physical Geolocation & Gateway
+      const geo = data.origin_geo || {};
+      document.getElementById('originIpDisplay').innerText = data.origin_ip || '0.0.0.0';
+      const cityStr = geo.city || 'Unknown City';
+      const countryStr = geo.country || 'Unknown Country';
+      document.getElementById('originLocationDisplay').innerText = `${cityStr}, ${countryStr}`;
+      document.getElementById('originOrgDisplay').innerText = geo.org || 'Direct ISP / Enterprise Gateway';
+
+      const proxyData = data.proxy_analysis || {};
+      const proxyBadge = document.getElementById('proxyBadge');
+      proxyBadge.innerText = proxyData.badge_status || 'DIRECT ISP';
+      
+      if (proxyData.badge_color === 'red') {
+        proxyBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800';
+        document.getElementById('privacyAuditBadge').className = 'text-xs font-mono font-bold px-3 py-1 rounded bg-rose-950 text-rose-300 border border-rose-800';
+        document.getElementById('privacyAuditBadge').innerText = 'ANONYMIZER / TOR EXIT NODE CONFIRMED';
+      } else if (proxyData.badge_color === 'amber') {
+        proxyBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800';
+        document.getElementById('privacyAuditBadge').className = 'text-xs font-mono font-bold px-3 py-1 rounded bg-amber-950 text-amber-300 border border-amber-800';
+        document.getElementById('privacyAuditBadge').innerText = 'CLOUD VPS HOSTING RELAY';
+      } else {
+        proxyBadge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800';
+        document.getElementById('privacyAuditBadge').className = 'text-xs font-mono font-bold px-3 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-800';
+        document.getElementById('privacyAuditBadge').innerText = 'DIRECT TRANSMISSION (CLEAN GATEWAY)';
+      }
+
+      // 5. Protocol Security Matrix
+      setBadge('spfBadge', data.spf_status);
+      setBadge('dkimBadge', data.dkim_status);
+      setBadge('dmarcBadge', data.dmarc_status);
+
+      document.getElementById('hopCountDisplay').innerText = (data.hops || []).length;
+      document.getElementById('nlpPercentDisplay').innerText = (data.nlp_score || 0) + '%';
+
+      // 6. Chronological Transmission Table & Hop Navigation Pills
+      renderHopsTable(data.hops || []);
+      renderHopPills(data.hops || []);
+
+      // 7. Bottom Hub Viewers
+      renderInboxViewer(data);
+      renderExtractedUrls(data.extracted_urls || []);
+      renderToneLexicon(data);
+      renderProxyAudit(proxyData);
+
+      // 8. Raw Headers Viewer
+      document.getElementById('rawHeadersViewer').innerText = rawHeadersCache;
+
+      // 9. Court Package JSON
+      renderCourtPackage(data);
+
+      // 10. Default to Email Body Tab
+      switchTab('inboxTab');
+
+      // 11. Render Compact Preview Map
+      setTimeout(() => {
+        renderHopMap(data.hops || [], data.origin_ip);
+        if (map) map.invalidateSize();
+      }, 100);
+      setTimeout(() => {
+        if (map) map.invalidateSize();
+      }, 300);
+
+      // Smooth scroll to results
+      resultsWorkspace.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function setBadge(elemId, status) {
+      const elem = document.getElementById(elemId);
+      elem.innerText = status || 'NONE';
+      if (status === 'PASS') {
+        elem.className = 'font-mono text-[11px] font-bold px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800';
+      } else if (status === 'FAIL') {
+        elem.className = 'font-mono text-[11px] font-bold px-1.5 py-0.2 rounded bg-rose-950 text-rose-300 border border-rose-800';
+      } else if (status === 'SOFTFAIL') {
+        elem.className = 'font-mono text-[11px] font-bold px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-800';
+      } else {
+        elem.className = 'font-mono text-[11px] font-bold px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700';
+      }
+    }
+
+    // ==========================================
+    // MAP IMPLEMENTATION (COMPACT & SCROLL-SAFE)
+    // ==========================================
+
+    function setMapLayer(style) {
+      currentMapStyle = style;
+      ['btnLayerOsm', 'btnLayerEsri', 'btnLayerSatellite', 'btnLayerVoyager'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white';
+        }
+      });
+
+      const activeBtnId = style === 'osm' ? 'btnLayerOsm' : (style === 'esri' ? 'btnLayerEsri' : (style === 'satellite' ? 'btnLayerSatellite' : 'btnLayerVoyager'));
+      const activeBtn = document.getElementById(activeBtnId);
+      if (activeBtn) {
+        activeBtn.className = 'px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold shadow-2xs';
+      }
+
+      const provider = MAP_PROVIDERS[style];
+      if (map && baseTileLayer) {
+        map.removeLayer(baseTileLayer);
+        baseTileLayer = L.tileLayer(provider.url, provider.options).addTo(map);
+      }
+    }
+
+    function zoomInMap() {
+      if (map) map.zoomIn();
+    }
+
+    function zoomOutMap() {
+      if (map) map.zoomOut();
+    }
+
+    function renderHopMap(hops, originIp) {
+      const mapContainer = document.getElementById('map');
+      if (!mapContainer) return;
+
+      const noHopsBanner = document.getElementById('noHopsBanner');
+
+      if (!map) {
+        // Safe: scrollWheelZoom and touchZoom disabled on inline map to guarantee zero page scroll trapping
+        map = L.map('map', {
+          zoomControl: false,
+          scrollWheelZoom: false,
+          touchZoom: false,
+          dragging: false,
+          doubleClickZoom: false
+        }).setView([20, 0], 2);
+
+        const provider = MAP_PROVIDERS[currentMapStyle];
+        baseTileLayer = L.tileLayer(provider.url, provider.options).addTo(map);
+      }
+
+      map.invalidateSize();
+
+      // Clear existing markers & polyline
+      mapMarkers.forEach(m => map.removeLayer(m));
+      mapMarkers = [];
+      if (mapPolyline) {
+        map.removeLayer(mapPolyline);
+        mapPolyline = null;
+      }
+
+      const validCoords = [];
+
+      hops.forEach((hop, idx) => {
+        const lat = parseFloat(hop.latitude);
+        const lon = parseFloat(hop.longitude);
+
+        if (!isNaN(lat) && !isNaN(lon) && (lat !== 0 || lon !== 0)) {
+          validCoords.push([lat, lon]);
+
+          const isOrigin = (hop.relay_ip === originIp && !hop.is_private) || idx === 0;
+          const isGateway = (idx === hops.length - 1);
+          
+          let markerBg = '#3B82F6'; // Blue
+          let pulseClass = '';
+          if (isOrigin) {
+            markerBg = '#EF4444'; // Red
+            pulseClass = 'origin-pulse';
+          } else if (isGateway) {
+            markerBg = '#10B981'; // Green
+          }
+
+          const icon = L.divIcon({
+            className: 'custom-marker-wrapper',
+            html: `<div class="custom-marker ${pulseClass}" style="background-color: ${markerBg}; width: 22px; height: 22px;">${hop.hop_order}</div>`,
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+          });
+
+          const popupHtml = `
+            <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; padding: 2px; color: #F8FAFC; min-width: 160px;">
+              <div style="color: ${markerBg}; font-weight: 800; border-bottom: 1.5px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">
+                HOP #${hop.hop_order} ${isOrigin ? '[ORIGIN]' : (isGateway ? '[DESTINATION]' : '[RELAY]')}
+              </div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #93C5FD;"><b>IP:</b> ${hop.relay_ip}</div>
+              <div style="color: #E2E8F0;"><b>Location:</b> ${hop.city || 'Unknown'}, ${hop.country || 'Unknown'}</div>
+              <div style="color: #94A3B8;"><b>Host:</b> ${hop.claimed_host || 'N/A'}</div>
+              <div style="color: #CBD5E1;"><b>Latency:</b> +${hop.latency_seconds || 0}s</div>
+            </div>
+          `;
+
+          const marker = L.marker([lat, lon], { icon: icon }).addTo(map).bindPopup(popupHtml);
+          mapMarkers.push(marker);
+          hop._marker = marker;
+        }
+      });
+
+      if (validCoords.length > 1) {
+        if (noHopsBanner) noHopsBanner.classList.add('hidden');
+        mapPolyline = L.polyline(validCoords, {
+          color: '#3B82F6',
+          weight: 2.5,
+          opacity: 0.85,
+          dashArray: '5, 5'
+        }).addTo(map);
+
+        map.fitBounds(validCoords, { padding: [20, 20], maxZoom: 7 });
+      } else if (validCoords.length === 1) {
+        if (noHopsBanner) noHopsBanner.classList.add('hidden');
+        map.setView(validCoords[0], 5);
+      } else {
+        if (noHopsBanner) noHopsBanner.classList.remove('hidden');
+        map.setView([20, 0], 2);
+      }
+    }
+
+    function resetMapView() {
+      if (!map || mapMarkers.length === 0) return;
+      const coords = mapMarkers.map(m => m.getLatLng());
+      if (coords.length > 1) {
+        map.fitBounds(coords, { padding: [20, 20], maxZoom: 7 });
+      } else if (coords.length === 1) {
+        map.setView(coords[0], 5);
+      }
+    }
+
+    // Guarantee map responsiveness across all screen sizes and device rotations
+    window.addEventListener('resize', () => {
+      if (map) map.invalidateSize();
+      if (modalMap) modalMap.invalidateSize();
+    });
+
+    function focusHopOnMap(order) {
+      if (!currentCaseData || !currentCaseData.hops) return;
+      const hop = currentCaseData.hops.find(h => h.hop_order === order);
+      if (hop && hop._marker && map) {
+        const latLng = hop._marker.getLatLng();
+        map.setView(latLng, 6, { animate: true });
+        hop._marker.openPopup();
+        document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function renderHopPills(hops) {
+      const container = document.getElementById('hopPillsContainer');
+      container.innerHTML = '';
+
+      if (hops.length === 0) return;
+
+      hops.forEach((hop, idx) => {
+        const isOrigin = idx === 0;
+        const isGateway = idx === hops.length - 1;
+        const btn = document.createElement('button');
+        
+        let colorClasses = 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700';
+        if (isOrigin) colorClasses = 'bg-rose-950 hover:bg-rose-900 text-rose-200 border-rose-800 font-bold';
+        else if (isGateway) colorClasses = 'bg-emerald-950 hover:bg-emerald-900 text-emerald-200 border-emerald-800 font-bold';
+
+        btn.className = `px-2.5 py-1 rounded-lg border text-xs font-mono transition shrink-0 flex items-center gap-1 ${colorClasses}`;
+        btn.innerHTML = `<span>#${hop.hop_order}</span> <span>${hop.city || 'Relay'}</span>`;
+        btn.onclick = () => focusHopOnMap(hop.hop_order);
+        container.appendChild(btn);
+      });
+    }
+
+    function renderHopsTable(hops) {
+      const tbody = document.getElementById('hopsTableBody');
+      tbody.innerHTML = '';
+
+      if (hops.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-400 font-sans font-medium">No intermediate relay hops detected.</td></tr>';
+        return;
+      }
+
+      hops.forEach((hop) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/60 transition cursor-pointer';
+        tr.onclick = () => focusHopOnMap(hop.hop_order);
+
+        const privBadge = hop.is_private
+          ? '<span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700 font-bold">Private IP</span>'
+          : '<span class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">Public IP</span>';
+
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-bold text-blue-400 font-mono">#${hop.hop_order}</td>
+          <td class="py-2.5 px-3 font-bold text-white font-mono">${hop.relay_ip}</td>
+          <td class="py-2.5 px-3">${privBadge}</td>
+          <td class="py-2.5 px-3 text-slate-300 truncate max-w-[150px]">${hop.claimed_host || '-'}</td>
+          <td class="py-2.5 px-3 text-slate-200 font-semibold">${hop.city || 'Unknown'}, ${hop.country || 'Unknown'}</td>
+          <td class="py-2.5 px-3 text-slate-400 font-mono font-bold">+${hop.latency_seconds || 0}s</td>
+          <td class="py-2.5 px-3 text-right">
+            <button onclick="event.stopPropagation(); focusHopOnMap(${hop.hop_order})" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-blue-600 hover:text-white text-xs text-slate-300 border border-slate-700 transition font-mono font-bold">
+              Focus
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ==========================================
+    // DEDICATED MAP EXPLORATION SCREEN LOGIC
+    // ==========================================
+
+    function openMapModal(targetHopOrder = null) {
+      const modal = document.getElementById('mapModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+
+      const hops = (currentCaseData && currentCaseData.hops) ? currentCaseData.hops : [];
+      const originIp = currentCaseData ? currentCaseData.origin_ip : '0.0.0.0';
+
+      renderModalHopPills(hops);
+
+      setTimeout(() => {
+        initOrUpdateModalMap(hops, originIp, targetHopOrder);
+      }, 80);
+    }
+
+    function closeMapModal() {
+      const modal = document.getElementById('mapModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function initOrUpdateModalMap(hops, originIp, targetHopOrder = null) {
+      const modalCanvas = document.getElementById('modalMap');
+      if (!modalCanvas) return;
+
+      if (!modalMap) {
+        modalMap = L.map('modalMap', {
+          zoomControl: false,
+          scrollWheelZoom: true,
+          touchZoom: true,
+          dragging: true,
+          doubleClickZoom: true
+        }).setView([20, 0], 2);
+
+        const provider = MAP_PROVIDERS[currentModalMapStyle];
+        modalTileLayer = L.tileLayer(provider.url, provider.options).addTo(modalMap);
+      }
+
+      modalMap.invalidateSize();
+
+      modalMarkers.forEach(m => modalMap.removeLayer(m));
+      modalMarkers = [];
+      if (modalPolyline) {
+        modalMap.removeLayer(modalPolyline);
+        modalPolyline = null;
+      }
+
+      const validCoords = [];
+      let targetMarker = null;
+
+      hops.forEach((hop, idx) => {
+        const lat = parseFloat(hop.latitude);
+        const lon = parseFloat(hop.longitude);
+
+        if (!isNaN(lat) && !isNaN(lon) && (lat !== 0 || lon !== 0)) {
+          validCoords.push([lat, lon]);
+
+          const isOrigin = (hop.relay_ip === originIp && !hop.is_private) || idx === 0;
+          const isGateway = (idx === hops.length - 1);
+          
+          let markerBg = '#3B82F6';
+          let pulseClass = '';
+          if (isOrigin) {
+            markerBg = '#EF4444';
+            pulseClass = 'origin-pulse';
+          } else if (isGateway) {
+            markerBg = '#10B981';
+          }
+
+          const icon = L.divIcon({
+            className: 'custom-marker-wrapper',
+            html: `<div class="custom-marker ${pulseClass}" style="background-color: ${markerBg}; width: 26px; height: 26px; font-size: 12px;">${hop.hop_order}</div>`,
+            iconSize: [26, 26],
+            iconAnchor: [13, 13]
+          });
+
+          const popupHtml = `
+            <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; padding: 4px; color: #F8FAFC; min-width: 200px;">
+              <div style="color: ${markerBg}; font-weight: 800; border-bottom: 1.5px solid #334155; padding-bottom: 3px; margin-bottom: 5px;">
+                HOP #${hop.hop_order} ${isOrigin ? '[AUTHENTIC ORIGIN]' : (isGateway ? '[DESTINATION MX]' : '[TRANSIT RELAY]')}
+              </div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #93C5FD;"><b>IP:</b> ${hop.relay_ip}</div>
+              <div style="color: #E2E8F0;"><b>Location:</b> ${hop.city || 'Unknown'}, ${hop.country || 'Unknown'}</div>
+              <div style="color: #94A3B8;"><b>ASN / ISP:</b> ${hop.isp || 'N/A'}</div>
+              <div style="color: #94A3B8;"><b>Claimed Host:</b> ${hop.claimed_host || 'N/A'}</div>
+              <div style="color: #CBD5E1;"><b>Relay Delay:</b> +${hop.latency_seconds || 0}s</div>
+            </div>
+          `;
+
+          const marker = L.marker([lat, lon], { icon: icon }).addTo(modalMap).bindPopup(popupHtml);
+          modalMarkers.push(marker);
+          hop._modalMarker = marker;
+
+          if (targetHopOrder !== null && hop.hop_order === targetHopOrder) {
+            targetMarker = marker;
+          }
+        }
+      });
+
+      if (validCoords.length > 1) {
+        modalPolyline = L.polyline(validCoords, {
+          color: '#3B82F6',
+          weight: 3,
+          opacity: 0.9,
+          dashArray: '6, 6'
+        }).addTo(modalMap);
+      }
+
+      if (targetMarker) {
+        modalMap.setView(targetMarker.getLatLng(), 6);
+        targetMarker.openPopup();
+      } else if (validCoords.length > 1) {
+        modalMap.fitBounds(validCoords, { padding: [35, 35], maxZoom: 8 });
+      } else if (validCoords.length === 1) {
+        modalMap.setView(validCoords[0], 5);
+      } else {
+        modalMap.setView([20, 0], 2);
+      }
+    }
+
+    function zoomInModalMap() {
+      if (modalMap) modalMap.zoomIn();
+    }
+
+    function zoomOutModalMap() {
+      if (modalMap) modalMap.zoomOut();
+    }
+
+    function resetModalMapView() {
+      if (!modalMap || modalMarkers.length === 0) return;
+      const coords = modalMarkers.map(m => m.getLatLng());
+      if (coords.length > 1) {
+        modalMap.fitBounds(coords, { padding: [35, 35], maxZoom: 8 });
+      } else if (coords.length === 1) {
+        modalMap.setView(coords[0], 5);
+      }
+    }
+
+    function focusHopOnModalMap(order) {
+      if (!currentCaseData || !currentCaseData.hops) return;
+      const hop = currentCaseData.hops.find(h => h.hop_order === order);
+      if (hop && hop._modalMarker && modalMap) {
+        modalMap.setView(hop._modalMarker.getLatLng(), 6, { animate: true });
+        hop._modalMarker.openPopup();
+      }
+    }
+
+    function renderModalHopPills(hops) {
+      const container = document.getElementById('modalHopPillsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (hops.length === 0) return;
+
+      hops.forEach((hop, idx) => {
+        const isOrigin = idx === 0;
+        const isGateway = idx === hops.length - 1;
+        const btn = document.createElement('button');
+        
+        let colorClasses = 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700';
+        if (isOrigin) colorClasses = 'bg-rose-950 hover:bg-rose-900 text-rose-200 border-rose-800 font-bold';
+        else if (isGateway) colorClasses = 'bg-emerald-950 hover:bg-emerald-900 text-emerald-200 border-emerald-800 font-bold';
+
+        btn.className = `px-2.5 py-1 rounded-lg border text-xs font-mono transition shrink-0 flex items-center gap-1 shadow-2xs ${colorClasses}`;
+        btn.innerHTML = `<span>#${hop.hop_order}</span> <span>${hop.city || 'Relay'}</span>`;
+        btn.onclick = () => focusHopOnModalMap(hop.hop_order);
+        container.appendChild(btn);
+      });
+    }
+
+    function setModalMapLayer(style) {
+      currentModalMapStyle = style;
+      ['btnModalLayerOsm', 'btnModalLayerEsri', 'btnModalLayerSatellite', 'btnModalLayerVoyager'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white';
+      });
+
+      const activeBtnId = style === 'osm' ? 'btnModalLayerOsm' : (style === 'esri' ? 'btnModalLayerEsri' : (style === 'satellite' ? 'btnModalLayerSatellite' : 'btnModalLayerVoyager'));
+      const activeBtn = document.getElementById(activeBtnId);
+      if (activeBtn) activeBtn.className = 'px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold shadow-2xs';
+
+      const provider = MAP_PROVIDERS[style];
+      if (modalMap && modalTileLayer) {
+        modalMap.removeLayer(modalTileLayer);
+        modalTileLayer = L.tileLayer(provider.url, provider.options).addTo(modalMap);
+      }
+    }
+
+    // Visual Email Reader Viewer
+    function renderInboxViewer(data) {
+      document.getElementById('inboxSubject').innerText = data.subject || 'No Subject';
+      document.getElementById('inboxSender').innerText = data.sender || 'Unknown';
+      document.getElementById('inboxDomain').innerText = data.sender_domain || 'unknown';
+
+      const bodyViewer = document.getElementById('inboxBodyViewer');
+      bodyViewer.innerText = data.plain_body || 'No message body extracted.';
+
+      const ribbon = document.getElementById('inboxSecurityRibbon');
+      if (data.verdict === 'MALICIOUS') {
+        ribbon.className = 'px-3 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 bg-rose-950 text-rose-300 border border-rose-800';
+        ribbon.innerHTML = '<span>[CRITICAL THREAT: MALICIOUS PAYLOAD / VECTOR IDENTIFIED]</span>';
+      } else if (data.verdict === 'SUSPICIOUS') {
+        ribbon.className = 'px-3 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 bg-amber-950 text-amber-300 border border-amber-800';
+        ribbon.innerHTML = '<span>[SUSPICIOUS DISCREPANCIES / UNVERIFIED IDENTITY]</span>';
+      } else {
+        ribbon.className = 'px-3 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 bg-emerald-950 text-emerald-300 border border-emerald-800';
+        ribbon.innerHTML = '<span>[VERIFIED AUTHENTIC TRANSMISSION: PASS]</span>';
+      }
+    }
+
+    // Extracted URLs Table Renderer
+    function renderExtractedUrls(urls) {
+      const tbody = document.getElementById('urlsTableBody');
+      const countBadge = document.getElementById('urlCountBadge');
+      countBadge.innerText = urls.length;
+      tbody.innerHTML = '';
+
+      if (urls.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center py-3 text-slate-500 font-sans">No embedded hyperlinks detected.</td></tr>';
+        return;
+      }
+
+      urls.forEach(url => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/60 transition';
+
+        const isIpUrl = /https?:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(url);
+        const isPhishWord = /(login|signin|verify|account|auth|reset|passwd|password|update)/i.test(url);
+        const isSusTld = /\.(xyz|top|tk|ml|ga|cf|gq|buzz|cam|click|work)/i.test(url);
+
+        let riskPill = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">Standard URL</span>';
+        if (isIpUrl || (isPhishWord && isSusTld)) {
+          riskPill = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800">High Risk (Direct IP / Credential Target)</span>';
+        } else if (isPhishWord || isSusTld) {
+          riskPill = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-800">Elevated (Auth Keyword / Untrusted TLD)</span>';
+        }
+
+        tr.innerHTML = `
+          <td class="py-2 px-3 text-slate-200 truncate max-w-[280px]" title="${url}">${url}</td>
+          <td class="py-2 px-3">${riskPill}</td>
+          <td class="py-2 px-3 text-right">
+            <button onclick="copyToClipboard('${url}')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-blue-600 hover:text-white text-[11px] font-mono font-bold transition text-slate-300 border border-slate-700">
+              Copy Link
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderToneLexicon(data) {
+      const container = document.getElementById('toneLexiconContainer');
+      container.innerHTML = '';
+
+      const nlpData = data.nlp_intent || {};
+      const toneData = data.tone_analysis || {};
+      const matches = toneData.abusive_matches || [];
+
+      const expElem = document.getElementById('toneDeepExplanation');
+      if (expElem) {
+        expElem.innerText = nlpData.disambiguation_note || (toneData.has_abusive_language ? 'Emotional outburst detected without cyber fraud.' : 'Standard communication tone.');
+      }
+
+      const abuseDisplay = document.getElementById('abuseFilterDisplay');
+      if (abuseDisplay) {
+        abuseDisplay.innerText = toneData.has_abusive_language ? 'Hostile Tokens Flagged' : 'Normal / Clean';
+        abuseDisplay.className = toneData.has_abusive_language ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold';
+      }
+
+      const fraudDisplay = document.getElementById('fraudIntentDisplay');
+      if (fraudDisplay) {
+        fraudDisplay.innerText = (data.nlp_score || 0) + '%';
+        fraudDisplay.className = (data.nlp_score > 50) ? 'text-rose-400 font-bold' : ((data.nlp_score > 0) ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold');
+      }
+
+      if (matches.length === 0) {
+        container.innerHTML = '<span class="text-xs text-slate-500 font-medium">No aggressive or coercive expressions flagged.</span>';
+        return;
+      }
+
+      matches.forEach(term => {
+        const span = document.createElement('span');
+        span.className = 'px-2 py-0.5 rounded bg-amber-950/80 text-amber-200 border border-amber-800 text-xs font-mono font-bold';
+        span.innerText = `"${term}"`;
+        container.appendChild(span);
+      });
+    }
+
+    function renderProxyAudit(proxyData) {
+      const container = document.getElementById('proxyAuditDetails');
+      container.innerHTML = '';
+
+      const indicators = proxyData.indicators || [];
+      if (indicators.length === 0) {
+        container.innerHTML = '<div class="text-slate-300 font-medium">No proxy forward headers (Via, X-Forwarded-For) or Tor exit nodes identified. Transmission arrived directly through standard authorized enterprise gateway.</div>';
+        return;
+      }
+
+      indicators.forEach(ind => {
+        const div = document.createElement('div');
+        div.className = 'flex items-start gap-2 text-slate-200 font-medium font-mono text-xs';
+        div.innerHTML = `<span class="text-blue-400 font-bold">&bull;</span><span>${ind}</span>`;
+        container.appendChild(div);
+      });
+    }
+
+    function renderCourtPackage(data) {
+      const courtReport = {
+        court_evidence_metadata: {
+          evidence_id: `EXHIBIT-${(data.case_id || '').toUpperCase().substring(0, 8)}`,
+          case_uuid: data.case_id,
+          sha256_cryptographic_hash: data.sha256,
+          custody_timestamp_utc: new Date().toISOString(),
+          compliance_standard: "SIH Cyber Security Cell Problem Statement #26106 / Section 65B Indian Evidence Act"
+        },
+        message_attribution: {
+          originating_ip: data.origin_ip,
+          origin_location: data.origin_geo,
+          declared_sender: data.sender,
+          sender_domain: data.sender_domain,
+          return_path: data.return_path,
+          recipient: data.recipient,
+          received_date: data.received_date
+        },
+        protocol_authenticity_matrix: {
+          spf_result: data.spf_status,
+          dkim_result: data.dkim_status,
+          dmarc_result: data.dmarc_status,
+          display_spoof_detected: data.is_display_spoofed
+        },
+        threat_assessment: {
+          threat_score: data.threat_score,
+          verdict: data.verdict,
+          score_breakdown: data.score_breakdown,
+          nlp_intent_score: data.nlp_score,
+          tone_intelligence: data.tone_analysis,
+          anonymity_proxy_diagnostics: data.proxy_analysis
+        },
+        transmission_hops: data.hops
+      };
+
+      document.getElementById('courtPackageJson').innerText = JSON.stringify(courtReport, null, 2);
+    }
+
+    // ==========================================
+    // DETAILED PDF DOWNLOAD & PREVIEW
+    // ==========================================
+
+    async function downloadPdfReport() {
+      if (!currentCaseData || !currentCaseData.case_id) {
+        alert('Please analyze an email first before downloading the PDF report.');
+        return;
+      }
+
+      showToast('Generating official forensic PDF report...');
+      try {
+        const response = await fetch(`/api/report/pdf/${currentCaseData.case_id}?download=true`);
+        if (!response.ok) throw new Error('Failed to generate PDF report');
+        
+        const blob = await response.blob();
+        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(pdfBlob);
+        
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `AE-Forensics-Report-${currentCaseData.case_id.substring(0, 8).toUpperCase()}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        showToast('PDF report downloaded successfully.');
+      } catch (err) {
+        alert('Error downloading PDF report: ' + err.message);
+      }
+    }
+
+    function previewPdfReport() {
+      if (!currentCaseData || !currentCaseData.case_id) {
+        alert('Please analyze an email first before previewing the PDF report.');
+        return;
+      }
+      window.open(`/api/report/pdf/${currentCaseData.case_id}`, '_blank');
+    }
+
+    // ==========================================
+    // TAB SWITCHER
+    // ==========================================
+
+    function switchTab(tabId) {
+      const tabs = ['inboxTab', 'toneTab', 'proxyTab', 'headersTab', 'courtTab'];
+      
+      tabs.forEach(t => {
+        const contentElem = document.getElementById(t);
+        if (contentElem) contentElem.classList.add('hidden');
+        
+        const btn = document.getElementById('tabBtn-' + t);
+        if (btn) {
+          btn.classList.remove('active');
+          btn.className = 'tab-nav-btn px-4 py-2.5 rounded-t-xl text-slate-400 hover:text-slate-200 flex items-center gap-2 border-b-2 border-transparent';
+        }
+      });
+
+      const activeContent = document.getElementById(tabId);
+      if (activeContent) activeContent.classList.remove('hidden');
+      
+      const activeBtn = document.getElementById('tabBtn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.className = 'tab-nav-btn active px-4 py-2.5 rounded-t-xl text-blue-400 font-bold bg-slate-900 border-b-2 border-blue-500 flex items-center gap-2';
+      }
+    }
+
+    // Quick IOC Export Modal
+    function toggleIocModal() {
+      const modal = document.getElementById('iocModal');
+      if (modal.classList.contains('hidden')) {
+        if (!currentCaseData) {
+          showToast('Please analyze an email to export IOCs.');
+          return;
+        }
+        populateIocExport();
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function populateIocExport() {
+      const data = currentCaseData || {};
+      const lines = [
+        `# AE-FORENSICS IOC EXPORT DOCKET - CASE-${(data.case_id || '').substring(0, 8).toUpperCase()}`,
+        `# Generated: ${new Date().toISOString()}`,
+        `# SHA-256 Custody Hash:`,
+        `${data.sha256 || 'N/A'}`,
+        ``,
+        `# Sender Identity & Mail Domains:`,
+        `sender_address: ${data.sender || 'N/A'}`,
+        `authenticated_domain: ${data.sender_domain || 'N/A'}`,
+        ``,
+        `# Origin & Intermediate Transmission Relays:`
+      ];
+
+      (data.hops || []).forEach(h => {
+        if (h.relay_ip && h.relay_ip !== '0.0.0.0') {
+          lines.push(`ip: ${h.relay_ip} # Hop #${h.hop_order} (${h.city || 'Unknown'}, ${h.country || 'Unknown'})`);
+        }
+      });
+
+      if (data.extracted_urls && data.extracted_urls.length > 0) {
+        lines.push(``);
+        lines.push(`# Extracted Hyperlink IOCs:`);
+        data.extracted_urls.forEach(u => lines.push(`url: ${u}`));
+      }
+
+      document.getElementById('iocExportText').value = lines.join('\n');
+    }
+
+    function copyIocText() {
+      const text = document.getElementById('iocExportText').value;
+      navigator.clipboard.writeText(text);
+      showToast('All IOCs copied to clipboard.');
+      toggleIocModal();
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text);
+      showToast('Copied to clipboard.');
+    }
+
+    function copyRawHeaders() {
+      if (!rawHeadersCache) return;
+      navigator.clipboard.writeText(rawHeadersCache);
+      showToast('Raw RFC headers copied to clipboard.');
+    }
+
+    function copyEvidenceHash() {
+      if (!currentCaseData) return;
+      navigator.clipboard.writeText(currentCaseData.sha256);
+      showToast('SHA-256 custody digest copied to clipboard.');
+    }
+
+    function copyCourtJson() {
+      const jsonText = document.getElementById('courtPackageJson').innerText;
+      navigator.clipboard.writeText(jsonText);
+      showToast('Section 65B JSON copied to clipboard.');
+    }
+
+    async function toggleHistoryDrawer() {
+      const drawer = document.getElementById('historyDrawer');
+      if (drawer.classList.contains('hidden')) {
+        drawer.classList.remove('hidden');
+        await loadCasesHistory();
+      } else {
+        drawer.classList.add('hidden');
+      }
+    }
+
+    async function loadCasesHistory() {
+      const container = document.getElementById('historyCasesList');
+      container.innerHTML = '<div class="text-xs text-slate-400 font-mono">Querying sqlite archive...</div>';
+      try {
+        const res = await fetch('/api/cases?limit=25');
+        const cases = await res.json();
+        container.innerHTML = '';
+        if (cases.length === 0) {
+          container.innerHTML = '<div class="text-xs text-slate-400 font-medium">No previous cases found in forensics.db</div>';
+          return;
+        }
+        cases.forEach(c => {
+          const div = document.createElement('div');
+          div.className = 'p-3 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-800 cursor-pointer transition flex justify-between items-center';
+          div.onclick = async () => {
+            const caseRes = await fetch(`/api/cases/${c.case_id}`);
+            const fullCase = await caseRes.json();
+            renderAnalysis(fullCase);
+            toggleHistoryDrawer();
+          };
+          div.innerHTML = `
+            <div>
+              <div class="text-xs font-black text-white font-mono">CASE-${(c.case_id || '').substring(0, 8).toUpperCase()}</div>
+              <div class="text-[11px] text-slate-300 truncate max-w-[240px] font-medium">${c.subject || 'No Subject'}</div>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded ${c.verdict === 'MALICIOUS' ? 'bg-rose-950 text-rose-300 border border-rose-800' : (c.verdict === 'SUSPICIOUS' ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800')}">${c.verdict}</span>
+          `;
+          container.appendChild(div);
+        });
+      } catch (e) {
+        container.innerHTML = '<div class="text-xs text-rose-400">Failed to load archive.</div>';
+      }
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'bg-slate-850 text-white px-4 py-2.5 rounded-xl text-xs font-medium shadow-xl flex items-center gap-2 border border-slate-700 animate-fade-in pointer-events-auto font-mono';
+      toast.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span><span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
