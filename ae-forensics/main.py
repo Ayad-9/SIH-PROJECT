@@ -57,14 +57,29 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Enable CORS for security research and front-end integration
+# Enable CORS for security research and front-end integration (Amplify, Lambda, Custom Domains)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origin_regex=r"^https?://.*",
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition", "Content-Type", "Content-Length", "X-Case-ID"],
 )
+
+
+@app.options("/{full_path:path}")
+async def preflight_options_handler(full_path: str):
+    """Fallback handler to guarantee 200 OK for any OPTIONS preflight request."""
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, HEAD",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
 
 
 def run_full_forensic_pipeline(raw_bytes: bytes, filename: str = "", db_path: Optional[str] = None) -> Dict[str, Any]:

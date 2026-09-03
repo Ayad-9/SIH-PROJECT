@@ -191,7 +191,7 @@
         </button>
 
         <!-- API Specs Link -->
-        <a href="/docs" target="_blank" class="hidden sm:flex items-center gap-1 text-xs px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold transition shadow-sm">
+        <a id="apiDocsLink" href="/docs" target="_blank" class="hidden sm:flex items-center gap-1 text-xs px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold transition shadow-sm">
           <span>REST API</span>
           <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -1048,9 +1048,19 @@
       if (input !== null) {
         localStorage.setItem('AE_API_BASE', input.trim());
         showToast(input.trim() ? `API endpoint set: ${input.trim()}` : 'API endpoint set to relative default.');
+        updateDocsLink();
         setTimeout(() => location.reload(), 800);
       }
     }
+
+    function updateDocsLink() {
+      const link = document.getElementById('apiDocsLink');
+      if (link) {
+        link.href = API_BASE ? `${API_BASE}/docs` : '/docs';
+      }
+    }
+    // Set dynamic docs link on load
+    updateDocsLink();
 
     let currentCaseData = null;
     let rawHeadersCache = '';
