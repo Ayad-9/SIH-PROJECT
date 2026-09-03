@@ -46,7 +46,13 @@ def lambda_handler(event, context):
         }
     
     try:
-        return _handler(event, context)
+        res = _handler(event, context)
+        # Strip duplicate CORS headers to prevent browser "multiple Access-Control-Allow-Origin values '*, *'" error
+        if isinstance(res, dict) and "headers" in res and isinstance(res["headers"], dict):
+            cors_keys = [k for k in res["headers"].keys() if k.lower().startswith("access-control-")]
+            for k in cors_keys:
+                del res["headers"][k]
+        return res
     except Exception as exc:
         return {
             "statusCode": 200,
