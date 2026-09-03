@@ -526,51 +526,51 @@
         </div>
       </section>
 
-      <!-- Transmission Geolocation Map Section (Compact 160-180px Preview, Non-Interfering) -->
-      <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3 shadow-sm">
+      <!-- Transmission Geolocation Map Section (High-Resolution 16:9 Aspect Ratio) -->
+      <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
         
         <!-- Map Header & Top Controls -->
         <div class="flex flex-wrap justify-between items-center gap-3">
           <div>
             <div class="flex items-center gap-2">
-              <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-              <h3 class="text-sm sm:text-base font-black text-white">Transmission Hop Geolocation Route</h3>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-mono">
-                OpenStreetMap
+              <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></div>
+              <h3 class="text-base sm:text-lg font-black text-white">Transmission Route &amp; Server Geolocation Map</h3>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-blue-300 border border-slate-700 font-mono">
+                Interactive Leaflet
               </span>
             </div>
             <p class="text-xs text-slate-400 font-medium mt-0.5">
-              Reconstructed SMTP transmission route. Click 'Explore Map Freely' for full 360-degree interactive viewer.
+              Reconstructed SMTP transmission hops across physical geographic coordinates.
             </p>
           </div>
 
           <!-- Action Controls in Map Header -->
-          <div class="flex items-center gap-2 flex-wrap">
+          <div class="flex items-center gap-2.5 flex-wrap">
             
             <!-- Free Map Providers Switcher -->
-            <div class="flex items-center bg-slate-950 rounded-xl p-0.5 border border-slate-800 text-xs font-bold font-mono">
-              <button onclick="setMapLayer('osm')" id="btnLayerOsm" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-2xs font-bold">
+            <div class="flex items-center bg-slate-950 rounded-xl p-0.5 border border-slate-800 text-xs font-bold font-mono shadow-inner">
+              <button onclick="setMapLayer('osm')" id="btnLayerOsm" class="px-2.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-xs font-bold transition">
                 OSM (Free)
               </button>
-              <button onclick="setMapLayer('esri')" id="btnLayerEsri" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+              <button onclick="setMapLayer('esri')" id="btnLayerEsri" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
                 Esri Streets
               </button>
-              <button onclick="setMapLayer('satellite')" id="btnLayerSatellite" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+              <button onclick="setMapLayer('satellite')" id="btnLayerSatellite" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
                 Satellite
               </button>
-              <button onclick="setMapLayer('voyager')" id="btnLayerVoyager" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+              <button onclick="setMapLayer('voyager')" id="btnLayerVoyager" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
                 Voyager
               </button>
             </div>
 
             <!-- Fit Route -->
-            <button onclick="resetMapView()" class="text-xs px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition font-bold shadow-xs" title="Fit map view to include all hops">
+            <button onclick="resetMapView()" class="text-xs px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700 hover:border-blue-500/40 transition font-bold shadow-xs cursor-pointer" title="Fit map view to include all hops">
               Fit Route
             </button>
 
-            <!-- Dedicated Explore Screen Button -->
-            <button onclick="openMapModal()" class="text-xs px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center gap-1.5 shadow-md shadow-blue-900/30 transition active:scale-95">
-              <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Dedicated Explore Screen Button (Highlighted) -->
+            <button onclick="openMapModal()" class="text-xs sm:text-sm px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black flex items-center gap-2 shadow-lg shadow-blue-900/40 ring-2 ring-blue-400/30 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
               </svg>
               <span>Explore Map Freely</span>
@@ -583,34 +583,44 @@
           <!-- Hop buttons inserted dynamically -->
         </div>
 
-        <!-- Compact Map Container (140px mobile, 160px desktop - Never captures mouse wheel or page swipe) -->
-        <div id="mapWrapper" class="relative rounded-2xl overflow-hidden border border-slate-800 shadow-inner bg-slate-950 transition-all">
+        <!-- High-Resolution Map Container (Balanced 380px Aspect Ratio) -->
+        <div id="mapWrapper" class="relative rounded-2xl overflow-hidden border border-slate-800 shadow-xl bg-slate-950 transition-all">
           
           <!-- Map Canvas -->
-          <div id="map" class="h-[140px] sm:h-[160px] w-full z-0"></div>
+          <div id="map" class="h-[320px] sm:h-[380px] md:h-[420px] w-full z-0"></div>
 
           <!-- On-Map Zoom Controls (+ and - INSIDE the map screen, top-right) -->
-          <div class="absolute top-2 right-2 z-20 flex flex-col gap-1 shadow-sm">
-            <button onclick="zoomInMap()" title="Zoom in (+)" class="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-white border border-slate-700 font-bold text-sm flex items-center justify-center transition shadow-xs active:scale-95">
+          <div class="absolute top-3 right-3 z-20 flex flex-col gap-1.5 shadow-md">
+            <button onclick="zoomInMap()" title="Zoom in (+)" class="w-8 h-8 rounded-xl bg-slate-900/95 hover:bg-slate-800 text-white border border-slate-700 font-black text-base flex items-center justify-center transition shadow-md active:scale-95 cursor-pointer">
               +
             </button>
-            <button onclick="zoomOutMap()" title="Zoom out (-)" class="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-white border border-slate-700 font-bold text-sm flex items-center justify-center transition shadow-xs active:scale-95">
+            <button onclick="zoomOutMap()" title="Zoom out (-)" class="w-8 h-8 rounded-xl bg-slate-900/95 hover:bg-slate-800 text-white border border-slate-700 font-black text-base flex items-center justify-center transition shadow-md active:scale-95 cursor-pointer">
               &minus;
             </button>
           </div>
 
-          <!-- On-Map "Explore Screen" Pill (INSIDE the map screen, top-left) -->
-          <div class="absolute top-2 left-2 z-20">
-            <button onclick="openMapModal()" class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm bg-slate-900/90 hover:bg-slate-800 text-blue-400 border border-slate-700 active:scale-95">
-              <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-              <span>Open Interactive Screen</span>
+          <!-- On-Map "Open Interactive Screen" Button (Prominently Highlighted, top-left) -->
+          <div class="absolute top-3 left-3 z-20">
+            <button onclick="openMapModal()" class="px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shadow-lg shadow-blue-950/80 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/50 ring-2 ring-blue-500/20 active:scale-95 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+              <span>Open Interactive Screen ↗</span>
             </button>
           </div>
 
-          <!-- On-Map Status Helper Pill (Bottom-left) -->
-          <div class="absolute bottom-2 left-2 z-20 bg-slate-950/90 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] font-mono text-slate-300 flex items-center gap-1.5 pointer-events-none border border-slate-800">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span>Page Scroll Unlocked &bull; Click to Explore</span>
+          <!-- On-Map Legend & Status Helper (Bottom-left) -->
+          <div class="absolute bottom-3 left-3 z-20 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[11px] font-mono text-slate-200 flex items-center gap-3 pointer-events-none border border-slate-800 shadow-lg">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-rose-500/30"></span>
+              <span class="font-bold text-white">Origin IP</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              <span>Relay Hop</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span>MX Destination</span>
+            </div>
           </div>
 
           <!-- Direct Endpoint Banner (When 0 Public Hops Detected) -->
@@ -922,59 +932,67 @@
         </div>
 
         <!-- Controls inside Modal Header -->
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-2.5 flex-wrap">
           
           <!-- Free Layer Switcher -->
-          <div class="flex items-center bg-slate-900 rounded-xl p-0.5 border border-slate-750 text-xs font-bold font-mono">
-            <button onclick="setModalMapLayer('osm')" id="btnModalLayerOsm" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-2xs font-bold">
+          <div class="flex items-center bg-slate-900 rounded-xl p-0.5 border border-slate-700 text-xs font-bold font-mono shadow-inner">
+            <button onclick="setModalMapLayer('osm')" id="btnModalLayerOsm" class="px-2.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-xs font-bold transition">
               OSM (Free)
             </button>
-            <button onclick="setModalMapLayer('esri')" id="btnModalLayerEsri" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+            <button onclick="setModalMapLayer('esri')" id="btnModalLayerEsri" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
               Esri Streets
             </button>
-            <button onclick="setModalMapLayer('satellite')" id="btnModalLayerSatellite" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+            <button onclick="setModalMapLayer('satellite')" id="btnModalLayerSatellite" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
               Satellite
             </button>
-            <button onclick="setModalMapLayer('voyager')" id="btnModalLayerVoyager" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">
+            <button onclick="setModalMapLayer('voyager')" id="btnModalLayerVoyager" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
               Voyager
             </button>
           </div>
 
           <!-- Fit Route -->
-          <button onclick="resetModalMapView()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition shadow-xs">
+          <button onclick="resetModalMapView()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700 hover:border-blue-500/40 text-xs font-bold transition shadow-xs cursor-pointer">
             Fit Route
           </button>
 
-          <!-- Close Button -->
-          <button onclick="closeMapModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition shadow-xs">
-            <span>&times;</span> <span>Close &amp; Return</span>
+          <!-- Highlighted Close Button -->
+          <button onclick="closeMapModal()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs sm:text-sm font-black flex items-center gap-1.5 transition shadow-lg shadow-rose-950/50 ring-2 ring-rose-400/30 active:scale-95 cursor-pointer">
+            <span>&times;</span> <span>Close (Esc)</span>
           </button>
         </div>
       </div>
 
       <!-- Hop Quick-Jump Bar inside Modal -->
-      <div id="modalHopPillsContainer" class="flex items-center gap-2 overflow-x-auto p-2 bg-slate-950/90 border-b border-slate-800 text-xs shrink-0">
+      <div id="modalHopPillsContainer" class="flex items-center gap-2 overflow-x-auto p-2.5 bg-slate-950/90 border-b border-slate-800 text-xs shrink-0">
         <!-- Injected hop jump pills -->
       </div>
 
-      <!-- Explorer Map Canvas (Balanced Landscape Aspect Ratio) -->
-      <div class="relative w-full overflow-hidden bg-slate-950 flex-1" style="height: 52vh; max-height: 480px; min-height: 280px;">
+      <!-- Explorer Map Canvas (High-Definition Aspect Ratio) -->
+      <div class="relative w-full overflow-hidden bg-slate-950 flex-1" style="height: 65vh; max-height: 650px; min-height: 380px;">
         <div id="modalMap" class="w-full h-full z-0"></div>
 
         <!-- Floating On-Map Zoom Buttons Inside Modal -->
-        <div class="absolute top-3 right-3 z-20 flex flex-col gap-1 shadow-md">
-          <button onclick="zoomInModalMap()" title="Zoom In" class="w-8 h-8 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white border border-slate-700 font-bold text-base flex items-center justify-center transition shadow-xs active:scale-95">
+        <div class="absolute top-3 right-3 z-20 flex flex-col gap-1.5 shadow-md">
+          <button onclick="zoomInModalMap()" title="Zoom In" class="w-8 h-8 rounded-xl bg-slate-900/95 hover:bg-slate-800 text-white border border-slate-700 font-black text-base flex items-center justify-center transition shadow-md active:scale-95 cursor-pointer">
             +
           </button>
-          <button onclick="zoomOutModalMap()" title="Zoom Out" class="w-8 h-8 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white border border-slate-700 font-bold text-base flex items-center justify-center transition shadow-xs active:scale-95">
+          <button onclick="zoomOutModalMap()" title="Zoom Out" class="w-8 h-8 rounded-xl bg-slate-900/95 hover:bg-slate-800 text-white border border-slate-700 font-black text-base flex items-center justify-center transition shadow-md active:scale-95 cursor-pointer">
             &minus;
           </button>
         </div>
 
-        <!-- Active Gesture Pill -->
-        <div class="absolute bottom-3 left-3 z-20 bg-slate-950/90 backdrop-blur-xs px-3 py-1 rounded-lg text-xs font-mono text-white border border-slate-800 flex items-center gap-2 pointer-events-none">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-          <span>Pan, Swipe, and Pinch/Wheel Zoom Active</span>
+        <!-- Active Gesture Pill & Legend Inside Modal -->
+        <div class="absolute bottom-3 left-3 z-20 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-mono text-white border border-slate-800 flex items-center gap-3 pointer-events-none shadow-lg">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>360° Pan &amp; Zoom Active</span>
+          </div>
+          <span class="text-slate-600">|</span>
+          <div class="flex items-center gap-2 text-[11px] text-slate-300">
+            <span class="text-rose-400 font-bold">● Origin</span>
+            <span class="text-blue-400 font-bold">● Relay</span>
+            <span class="text-emerald-400 font-bold">● MX</span>
+          </div>
         </div>
       </div>
 
