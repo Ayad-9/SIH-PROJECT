@@ -30,6 +30,12 @@ from services.imap_worker import get_imap_worker
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
+# Initialize database schema eagerly on cold start
+try:
+    init_db()
+except Exception:
+    pass
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

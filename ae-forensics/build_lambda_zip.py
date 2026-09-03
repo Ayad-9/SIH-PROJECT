@@ -63,7 +63,7 @@ def build_zip():
 
     # 4. Copy AE-Forensics application source files
     print("\n[3/4] Copying AE-Forensics application source code...")
-    for f in ["main.py", "database.py"]:
+    for f in ["main.py", "database.py", "lambda_function.py"]:
         src = os.path.join(SCRIPT_DIR, f)
         dst = os.path.join(BUILD_DIR, f)
         if os.path.exists(src):
