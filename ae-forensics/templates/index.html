@@ -176,6 +176,13 @@
           <span>New Analysis</span>
         </button>
 
+        <!-- Tutorial Button in Navbar -->
+        <button onclick="openTutorialModal()" title="Tutorial: How to download .eml file from Gmail" class="flex items-center gap-1.5 text-xs px-3 sm:px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 font-bold transition shadow-xs active:scale-95 cursor-pointer">
+          <span class="text-sm">💡</span>
+          <span class="hidden sm:inline">How to get .eml file?</span>
+          <span class="sm:hidden">.EML Guide</span>
+        </button>
+
         <!-- Past Scans Drawer Button -->
         <button onclick="toggleHistoryDrawer()" title="View previously analyzed emails" class="flex items-center gap-2 text-xs px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 font-bold transition shadow-sm active:scale-95">
           <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,10 +267,14 @@
                 Accepts RFC-822/5322 MIME (<b class="text-blue-400 font-mono">.eml</b>), Outlook Message (<b class="text-blue-400 font-mono">.msg</b>), and Plain Text Transcripts (<b class="text-blue-400 font-mono">.txt</b>).
               </p>
             </div>
-            <div class="flex flex-wrap items-center justify-center gap-2 text-xs font-mono text-slate-300 pt-1">
+            <div class="flex flex-wrap items-center justify-center gap-2 text-xs font-mono text-slate-300 pt-2">
               <span class="px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 shadow-xs">SHA-256 Seal</span>
-              <span class="px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 shadow-xs">Hop Reverse</span>
-              <span class="px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 shadow-xs">DNS Reconciled</span>
+              <span class="px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 shadow-xs">Server Tracing</span>
+              <!-- Tutorial Helper Link inside Dropzone -->
+              <button type="button" onclick="event.stopPropagation(); openTutorialModal();" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-900/40 hover:bg-blue-800/60 text-blue-300 border border-blue-500/40 font-sans font-bold text-xs transition cursor-pointer">
+                <span>💡 Tutorial: How to download .eml from Gmail</span>
+                <span class="text-[10px] bg-blue-600 text-white px-1.5 py-0.2 rounded font-mono">Guide</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1037,6 +1048,112 @@
     </div>
   </div>
 
+  <!-- Tutorial Modal: How to Download .EML from Gmail -->
+  <div id="tutorialModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 p-4 flex items-center justify-center overflow-y-auto">
+    <div class="bg-slate-900 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-slate-700 p-5 sm:p-7 space-y-5 my-auto max-h-[90vh] flex flex-col justify-between">
+      
+      <!-- Modal Header -->
+      <div class="flex justify-between items-start border-b border-slate-800 pb-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="text-lg sm:text-xl">📖</span>
+            <h3 class="text-base sm:text-lg font-black text-white">How to Download a .eml File (Gmail Guide)</h3>
+          </div>
+          <p class="text-xs text-slate-400 font-medium">Follow these quick steps on your laptop or computer to export any email for security analysis.</p>
+        </div>
+        <button onclick="closeTutorialModal()" class="px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+          <span>&times;</span> <span>Close</span>
+        </button>
+      </div>
+
+      <!-- Step-by-Step Instructions -->
+      <div class="space-y-3 overflow-y-auto pr-1 text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+        
+        <!-- Step 1 -->
+        <div class="flex items-start gap-3.5 bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80">
+          <div class="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono shadow-sm">1</div>
+          <div class="space-y-1">
+            <div class="font-bold text-white text-sm">Open Gmail on your Laptop or Computer</div>
+            <p class="text-xs text-slate-400">
+              Open your browser (Chrome, Edge, Safari, or Firefox) and log into your Gmail account.
+            </p>
+            <div class="text-[11px] text-amber-400 bg-amber-950/40 border border-amber-800/50 px-2.5 py-1 rounded-lg font-medium">
+              ⚠️ <b>Note:</b> The Gmail mobile app does not support downloading raw email (.eml) files directly. Please use a laptop or desktop browser.
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="flex items-start gap-3.5 bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80">
+          <div class="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono shadow-sm">2</div>
+          <div>
+            <div class="font-bold text-white text-sm">Open the Email you want to inspect</div>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Click on the specific email message in your inbox to open and view it.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="flex items-start gap-3.5 bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80">
+          <div class="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono shadow-sm">3</div>
+          <div>
+            <div class="font-bold text-white text-sm">Click the Three Dots (More Options ⋮)</div>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Look at the top-right corner of the email message (next to the Reply arrow), and click the <b>three vertical dots</b> (<b class="text-blue-400">⋮</b>) icon.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="flex items-start gap-3.5 bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80">
+          <div class="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono shadow-sm">4</div>
+          <div>
+            <div class="font-bold text-white text-sm">Click "Show original"</div>
+            <p class="text-xs text-slate-400 mt-0.5">
+              From the dropdown menu, click <b class="text-blue-400 font-semibold">"Show original"</b>. A new browser tab will immediately open showing the raw email headers and structure.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="flex items-start gap-3.5 bg-slate-950/60 p-3.5 rounded-2xl border border-slate-800/80">
+          <div class="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono shadow-sm">5</div>
+          <div class="space-y-1">
+            <div class="font-bold text-white text-sm">Click "Download Original"</div>
+            <p class="text-xs text-slate-400">
+              On the new tab, click the blue <b class="text-blue-400">"Download Original"</b> button to save the file to your computer.
+            </p>
+            <div class="text-[11px] text-blue-300 bg-blue-950/50 border border-blue-800/50 px-2.5 py-1 rounded-lg font-medium">
+              💡 <b>Tip:</b> Make sure to save the file with a <code class="bg-slate-800 text-white px-1.5 py-0.2 rounded font-mono">.eml</code> extension (e.g., <code class="bg-slate-800 text-white px-1.5 py-0.2 rounded font-mono">invoice.eml</code>). If it saves as <code class="bg-slate-800 text-white px-1.5 py-0.2 rounded font-mono">.txt</code>, it will still work, but <code class="bg-slate-800 text-white px-1.5 py-0.2 rounded font-mono">.eml</code> is recommended.
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="flex items-start gap-3.5 bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-800/40">
+          <div class="w-7 h-7 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono shadow-sm">6</div>
+          <div>
+            <div class="font-bold text-emerald-300 text-sm">Upload &amp; Analyze on AE-Forensics</div>
+            <p class="text-xs text-slate-300 mt-0.5">
+              Drag and drop your downloaded <b class="text-white">.eml</b> file into our scanner above to get an instant threat score, security checks, and full transmission server route map!
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Action Footer -->
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800 flex-wrap gap-2">
+        <span class="text-xs text-slate-400 font-mono">Supports all standard .eml, .msg, and .txt files</span>
+        <button onclick="closeTutorialModal()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm transition shadow-md shadow-blue-900/30 active:scale-95 cursor-pointer">
+          Got it, Close Guide &rarr;
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
@@ -1160,10 +1277,22 @@
       }
     });
 
+    // Tutorial Modal functions
+    function openTutorialModal() {
+      const modal = document.getElementById('tutorialModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeTutorialModal() {
+      const modal = document.getElementById('tutorialModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
     // Escape key closes modals
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeMapModal();
+        closeTutorialModal();
         const drawer = document.getElementById('historyDrawer');
         if (drawer && !drawer.classList.contains('hidden')) drawer.classList.add('hidden');
         const iocModal = document.getElementById('iocModal');
