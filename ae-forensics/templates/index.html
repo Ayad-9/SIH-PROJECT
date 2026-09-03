@@ -366,15 +366,130 @@
     <!-- Forensic Triage Results Workspace -->
     <div id="resultsWorkspace" class="hidden space-y-6">
 
-      <!-- Action & Docket Reference Bar -->
-      <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-wrap justify-between items-center gap-4 shadow-sm">
-        <div class="space-y-1 max-w-xl">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-xs font-mono px-2.5 py-0.5 rounded bg-blue-600 text-white font-bold">ANALYZED FILE</span>
-            <h2 id="caseRefTitle" class="text-lg sm:text-xl font-black text-white font-mono tracking-tight truncate">uploaded_email.eml</h2>
-            <span class="text-xs font-mono px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 font-bold">Report Ready</span>
+      <!-- 1. Top Section: Analyzed File Header & Threat Classification Cards -->
+      <section id="threatSummarySection" class="space-y-4">
+        
+        <!-- File Name & Docket Title Header -->
+        <div class="flex flex-wrap justify-between items-center gap-3 bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-sm">
+          <div class="space-y-1 max-w-xl">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-mono px-2.5 py-0.5 rounded bg-blue-600 text-white font-bold">ANALYZED FILE</span>
+              <h2 id="caseRefTitle" class="text-lg sm:text-xl font-black text-white font-mono tracking-tight truncate">uploaded_email.eml</h2>
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800 font-bold">Analysis Complete</span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-400 font-medium">Digital authenticity verified. Threat assessment and server path mapped.</p>
           </div>
-          <p class="text-xs sm:text-sm text-slate-400 font-medium">Digital authenticity verified. Threat assessment and server path mapped.</p>
+        </div>
+
+        <!-- 4 Diagnostic Telemetry Cards -->
+        <div id="diagnosticTelemetrySection" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+          <!-- Card 1: Overall Threat Verdict & Score -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
+            <div class="flex justify-between items-start">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">THREAT CLASSIFICATION</span>
+              <span id="verdictPill" class="text-xs font-mono font-extrabold px-3 py-0.5 rounded uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+                PENDING
+              </span>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex items-baseline gap-2">
+                <span id="scoreNumber" class="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white">0.0</span>
+                <span class="text-xs font-mono text-slate-500 font-bold">/ 100</span>
+              </div>
+              <!-- Score Gauge -->
+              <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                <div id="scoreBar" class="h-2 rounded-full bg-slate-700 transition-all duration-700" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 text-xs text-slate-400 leading-snug">
+              <span id="verdictSummary" class="font-medium text-slate-300">Awaiting triage...</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Sender Attribution & Alignment -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
+            <div class="flex justify-between items-start">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">SENDER ATTRIBUTION</span>
+              <span id="spoofBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">ALIGNED</span>
+            </div>
+
+            <div class="space-y-1.5 text-xs">
+              <div>
+                <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Declared Sender:</span>
+                <span id="senderDisplay" class="font-mono font-bold text-slate-100 truncate block">-</span>
+              </div>
+              <div>
+                <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Authenticated Domain:</span>
+                <span id="domainDisplay" class="font-mono font-extrabold text-blue-400 truncate block">-</span>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>Timestamp: <span id="dateDisplay" class="text-slate-200 font-bold truncate">N/A</span></span>
+            </div>
+          </div>
+
+          <!-- Card 3: Geolocation & Network Origin -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
+            <div class="flex justify-between items-start">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">ORIGIN INFRASTRUCTURE</span>
+              <span id="proxyBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">DIRECT ISP</span>
+            </div>
+
+            <div class="space-y-1.5 text-xs">
+              <div>
+                <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Origin IP:</span>
+                <span id="originIpDisplay" class="font-mono font-extrabold text-white text-sm">0.0.0.0</span>
+              </div>
+              <div>
+                <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Physical Location:</span>
+                <span id="originLocationDisplay" class="font-bold text-slate-200 truncate block">Unknown</span>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>ASN: <span id="originOrgDisplay" class="text-slate-200 font-bold truncate max-w-[140px]">Gateway</span></span>
+            </div>
+          </div>
+
+          <!-- Card 4: Protocol Authentication Matrix -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
+            <div class="flex justify-between items-start">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">SECURITY PROTOCOLS</span>
+              <span class="text-[10px] font-mono text-slate-500 font-bold">RFC Standards</span>
+            </div>
+
+            <div class="space-y-1 text-xs font-mono">
+              <div class="flex justify-between items-center pb-1 border-b border-slate-800">
+                <span class="text-slate-400">SPF Record</span>
+                <span id="spfBadge" class="font-bold px-1.5 py-0.2 rounded text-[11px]">-</span>
+              </div>
+              <div class="flex justify-between items-center pb-1 border-b border-slate-800">
+                <span class="text-slate-400">DKIM Signature</span>
+                <span id="dkimBadge" class="font-bold px-1.5 py-0.2 rounded text-[11px]">-</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400">DMARC Policy</span>
+                <span id="dmarcBadge" class="font-bold px-1.5 py-0.2 rounded text-[11px]">-</span>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 font-mono">
+              <span>Hops: <span id="hopCountDisplay" class="text-slate-200 font-bold">0</span></span>
+              <span>NLP Threat: <span id="nlpPercentDisplay" class="text-blue-400 font-bold">0%</span></span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 2. Action & Export Bar (Positioned under Threat Summary) -->
+      <section class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 flex flex-wrap justify-between items-center gap-4 shadow-sm">
+        <div class="text-xs text-slate-300 font-medium">
+          <span class="font-bold text-white">Forensic Actions:</span> Export report, preview PDF, or extract IOCs for blocking.
         </div>
 
         <div class="flex items-center gap-2.5 flex-wrap">
@@ -409,110 +524,6 @@
             </svg>
           </button>
         </div>
-      </section>
-
-      <!-- Diagnostic Telemetry Cards (4 Columns) -->
-      <section id="diagnosticTelemetrySection" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 scroll-mt-6">
-
-        <!-- Card 1: Overall Threat Verdict & Score -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
-          <div class="flex justify-between items-start">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">THREAT CLASSIFICATION</span>
-            <span id="verdictPill" class="text-xs font-mono font-extrabold px-3 py-0.5 rounded uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
-              PENDING
-            </span>
-          </div>
-
-          <div class="space-y-1.5">
-            <div class="flex items-baseline gap-2">
-              <span id="scoreNumber" class="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white">0.0</span>
-              <span class="text-xs font-mono text-slate-500 font-bold">/ 100</span>
-            </div>
-            <!-- Score Gauge -->
-            <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
-              <div id="scoreBar" class="h-2 rounded-full bg-slate-700 transition-all duration-700" style="width: 0%;"></div>
-            </div>
-          </div>
-
-          <div class="pt-2 border-t border-slate-800 text-xs text-slate-400 leading-snug">
-            <span id="verdictSummary" class="font-medium text-slate-300">Awaiting triage...</span>
-          </div>
-        </div>
-
-        <!-- Card 2: Sender Attribution & Alignment -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
-          <div class="flex justify-between items-start">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">SENDER ATTRIBUTION</span>
-            <span id="spoofBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">ALIGNED</span>
-          </div>
-
-          <div class="space-y-1.5 text-xs">
-            <div>
-              <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Declared Sender:</span>
-              <span id="senderDisplay" class="font-mono font-bold text-slate-100 truncate block">-</span>
-            </div>
-            <div>
-              <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Authenticated Domain:</span>
-              <span id="domainDisplay" class="font-mono font-extrabold text-blue-400 truncate block">-</span>
-            </div>
-          </div>
-
-          <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 font-mono">
-            <span>Timestamp: <span id="dateDisplay" class="text-slate-200 font-bold truncate">N/A</span></span>
-          </div>
-        </div>
-
-        <!-- Card 3: Geolocation & Network Origin -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
-          <div class="flex justify-between items-start">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">ORIGIN INFRASTRUCTURE</span>
-            <span id="proxyBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">DIRECT ISP</span>
-          </div>
-
-          <div class="space-y-1.5 text-xs">
-            <div>
-              <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Origin IP:</span>
-              <span id="originIpDisplay" class="font-mono font-extrabold text-white text-sm">0.0.0.0</span>
-            </div>
-            <div>
-              <span class="font-semibold block text-[10px] uppercase text-slate-500 font-mono">Physical Location:</span>
-              <span id="originLocationDisplay" class="font-bold text-slate-200 truncate block">Unknown</span>
-            </div>
-          </div>
-
-          <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 font-mono">
-            <span>ASN: <span id="originOrgDisplay" class="text-slate-200 font-bold truncate max-w-[140px]">Gateway</span></span>
-          </div>
-        </div>
-
-        <!-- Card 4: Protocol Authentication Matrix -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-sm">
-          <div class="flex justify-between items-start">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">SECURITY PROTOCOLS</span>
-            <span class="text-[10px] font-mono text-slate-500 font-bold">RFC Standards</span>
-          </div>
-
-          <div class="space-y-1 text-xs font-mono">
-            <div class="flex justify-between items-center pb-1 border-b border-slate-800">
-              <span class="text-slate-400">SPF Record</span>
-              <span id="spfBadge" class="font-bold px-1.5 py-0.2 rounded text-[11px]">-</span>
-            </div>
-            <div class="flex justify-between items-center pb-1 border-b border-slate-800">
-              <span class="text-slate-400">DKIM Signature</span>
-              <span id="dkimBadge" class="font-bold px-1.5 py-0.2 rounded text-[11px]">-</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-slate-400">DMARC Policy</span>
-              <span id="dmarcBadge" class="font-bold px-1.5 py-0.2 rounded text-[11px]">-</span>
-            </div>
-          </div>
-
-          <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 font-mono">
-            <span>Hops: <span id="hopCountDisplay" class="text-slate-200 font-bold">0</span></span>
-            <span>NLP Threat: <span id="nlpPercentDisplay" class="text-blue-400 font-bold">0%</span></span>
-          </div>
-        </div>
-
       </section>
 
       <!-- Transmission Geolocation Map Section (Compact 160-180px Preview, Non-Interfering) -->
@@ -1280,13 +1291,19 @@
       }
       document.getElementById('caseRefTitle').innerText = displayTitle;
 
-      // Auto-scroll / swipe down smoothly directly into Diagnostic Telemetry section (bypassing download bar)
+      // Smoothly scroll down directly to the results header and threat classification cards
       setTimeout(() => {
-        const telemetrySec = document.getElementById('diagnosticTelemetrySection');
-        if (telemetrySec) {
-          telemetrySec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const workspace = document.getElementById('resultsWorkspace');
+        if (workspace) {
+          const headerOffset = 80;
+          const elementPosition = workspace.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
         }
-      }, 150);
+      }, 100);
 
       // 2. Verdict & Score Gauge
       const score = parseFloat(data.threat_score) || 0;
