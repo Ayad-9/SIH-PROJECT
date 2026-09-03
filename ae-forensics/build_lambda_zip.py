@@ -1,10 +1,11 @@
 """
-AE-Forensics: Linux-Pure AWS Lambda ZIP Builder
-Builds a production-ready AWS Lambda deployment ZIP on Windows with precompiled Linux x86_64 binaries.
-Removes all Windows .pyd binaries and unneeded dev files to prevent Lambda 502/ImportErrors.
-
-Usage:
-    python build_lambda_zip.py
+AE-Forensics: Production AWS Lambda ZIP Builder
+Builds a complete, 100% Linux-compatible AWS Lambda deployment ZIP on Windows.
+Bundles precompiled Amazon Linux x86_64 native binaries for:
+- cryptography
+- cffi
+- pydantic-core (pinned to match pydantic 2.13.5)
+- pillow (required by ReportLab)
 """
 
 import os
@@ -21,7 +22,7 @@ ZIP_OUTPUT = os.path.join(SCRIPT_DIR, "lambda_function.zip")
 
 def build_zip():
     print("=" * 65)
-    print("   AE-Forensics: Linux-Pure AWS Lambda ZIP Packager   ")
+    print("   AE-Forensics: Production AWS Lambda ZIP Packager   ")
     print("=" * 65)
 
     # 1. Clean previous build folders
@@ -32,7 +33,7 @@ def build_zip():
     os.makedirs(BUILD_DIR, exist_ok=True)
     os.makedirs(WHEELS_DIR, exist_ok=True)
 
-    # 2. Install base pure-python packages
+    # 2. Install base pure-python serverless packages
     print("\n[1/4] Installing pure Python serverless dependencies...")
     pure_reqs = [
         "fastapi", "mangum", "reportlab", "dkimpy", "dnspython", "python-multipart", "jinja2"
@@ -44,9 +45,11 @@ def build_zip():
         "--no-compile"
     ])
 
-    # 3. Download Linux x86_64 binaries for native dependencies with exact matching versions
+    # 3. Download Linux x86_64 binaries for native dependencies
     print("\n[2/4] Downloading Amazon Linux 64-bit native binary wheels...")
-    linux_native_pkgs = ["cryptography", "cffi", "pydantic-core==2.46.5", "pycparser"]
+    linux_native_pkgs = [
+        "cryptography", "cffi", "pydantic-core==2.46.5", "pillow", "pycparser"
+    ]
     subprocess.check_call([
         sys.executable, "-m", "pip", "download",
         *linux_native_pkgs,
@@ -78,8 +81,8 @@ def build_zip():
         if os.path.exists(src):
             shutil.copytree(src, dst, dirs_exist_ok=True)
 
-    # Clean Windows .pyd binaries and unneeded dev files
-    print("\n[4/4] Purging Windows .pyd binaries, caches, and unused files...")
+    # Clean Windows .pyd binaries and unneeded dev metadata
+    print("\n[4/4] Purging Windows .pyd binaries, caches, and dev metadata...")
     for root, dirs, files in list(os.walk(BUILD_DIR, topdown=False)):
         for f in files:
             if f.endswith(".pyd") or f.endswith(".pyc") or f.endswith(".pyo"):
@@ -88,11 +91,11 @@ def build_zip():
                 except Exception:
                     pass
         for d in dirs:
-            if d.endswith(".dist-info") or d == "__pycache__" or d == "bin" or d == "tests" or d == "PIL":
+            if d.endswith(".dist-info") or d == "__pycache__" or d == "bin" or d == "tests":
                 shutil.rmtree(os.path.join(root, d), ignore_errors=True)
 
     # 5. Create the Lambda ZIP package
-    print("  -> Creating clean lambda_function.zip archive...")
+    print("  -> Creating production lambda_function.zip archive...")
     if os.path.exists(ZIP_OUTPUT):
         os.remove(ZIP_OUTPUT)
 
