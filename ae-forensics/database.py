@@ -10,7 +10,12 @@ from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 
 def get_default_db_path() -> str:
-    return os.environ.get("AE_DB_PATH", "forensics.db")
+    if "AE_DB_PATH" in os.environ:
+        return os.environ["AE_DB_PATH"]
+    # AWS Lambda environment is read-only except /tmp
+    if os.environ.get("AWS_LAMBDA_FUNCTION_NAME") or os.environ.get("AWS_EXECUTION_ENV"):
+        return "/tmp/forensics.db"
+    return "forensics.db"
 
 
 def get_db_connection(db_path: Optional[str] = None) -> sqlite3.Connection:
@@ -20,7 +25,10 @@ def get_db_connection(db_path: Optional[str] = None) -> sqlite3.Connection:
     target_path = db_path or get_default_db_path()
     conn = sqlite3.connect(target_path)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL;")
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+    except sqlite3.OperationalError:
+        conn.execute("PRAGMA journal_mode=DELETE;")
     conn.execute("PRAGMA foreign_keys=ON;")
     
     # Auto-initialize tables idempotently

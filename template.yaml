@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AE-Forensics Serverless Backend (FastAPI + Mangum on AWS Lambda)
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.11
+
+Resources:
+  AEForensicsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ae-forensics/
+      Handler: main.handler
+      Description: Automated Email Threat Triage & Geolocation Intelligence API
+      Environment:
+        Variables:
+          AE_DB_PATH: /tmp/forensics.db
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowOrigins:
+            - '*'
+          AllowMethods:
+            - '*'
+          AllowHeaders:
+            - '*'
+      Events:
+        ApiGatewayHttpApi:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+Outputs:
+  FunctionUrl:
+    Description: Direct AWS Lambda Function URL (Zero-Cost, HTTPS, No API Gateway needed)
+    Value: !GetAtt AEForensicsFunctionUrl.FunctionUrl
+  HttpApiUrl:
+    Description: Amazon API Gateway HTTP API Endpoint URL
+    Value: !Sub 'https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com'

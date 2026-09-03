@@ -1,0 +1,14 @@
+version: 1
+frontend:
+  phases:
+    build:
+      commands:
+        - echo "Building AE-Forensics Frontend for AWS Amplify..."
+        - mkdir -p dist
+        - cp ae-forensics/templates/index.html dist/index.html
+  artifacts:
+    baseDirectory: dist
+    files:
+      - '**/*'
+  cache:
+    paths: []

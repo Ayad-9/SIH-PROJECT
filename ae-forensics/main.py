@@ -34,14 +34,20 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle startup and shutdown handler."""
-    # 1. Initialize SQLite schema (forensics.db)
+    # 1. Initialize SQLite schema
     init_db()
-    # 2. Start IMAP background polling worker
-    worker = get_imap_worker()
-    worker.start()
+    # 2. Start IMAP background polling worker only in persistent server mode (not in Lambda)
+    worker = None
+    if not os.environ.get("AWS_LAMBDA_FUNCTION_NAME") and not os.environ.get("AWS_EXECUTION_ENV"):
+        try:
+            worker = get_imap_worker()
+            worker.start()
+        except Exception:
+            pass
     yield
     # Cleanup on server shutdown
-    worker.stop()
+    if worker:
+        worker.stop()
 
 
 app = FastAPI(
@@ -414,6 +420,14 @@ async def healthcheck():
             "cpu_nlp_engine": True
         }
     }
+
+
+# AWS Lambda Serverless Entrypoint (Mangum ASGI Adapter)
+try:
+    from mangum import Mangum
+    handler = Mangum(app, lifespan="off")
+except ImportError:
+    handler = None
 
 
 if __name__ == "__main__":

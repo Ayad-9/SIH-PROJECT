@@ -184,6 +184,12 @@
           <span>Evidence History</span>
         </button>
 
+        <!-- Backend API Endpoint Config (Amplify / Lambda switch) -->
+        <button onclick="configureApiBase()" title="Configure Backend API URL" class="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold transition shadow-sm">
+          <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span class="hidden sm:inline">Backend API</span>
+        </button>
+
         <!-- API Specs Link -->
         <a href="/docs" target="_blank" class="hidden sm:flex items-center gap-1 text-xs px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold transition shadow-sm">
           <span>REST API</span>
@@ -1027,6 +1033,25 @@
 
   <!-- Application Logic Scripts -->
   <script>
+    // Dynamic Backend Base URL (allows AWS Amplify to talk to AWS Lambda Function URL or API Gateway)
+    const API_BASE = (window.__API_BASE__ || localStorage.getItem('AE_API_BASE') || '').replace(/\/+$/, '');
+
+    function configureApiBase() {
+      const current = localStorage.getItem('AE_API_BASE') || '';
+      const input = prompt(
+        'Configure Backend API Endpoint for AWS Lambda:\n\n' +
+        '• Leave empty to use default relative path (/api/*)\n' +
+        '• Or enter your AWS Lambda Function URL or API Gateway URL:\n' +
+        '  (e.g., https://xyz123.lambda-url.us-east-1.on.aws)',
+        current
+      );
+      if (input !== null) {
+        localStorage.setItem('AE_API_BASE', input.trim());
+        showToast(input.trim() ? `API endpoint set: ${input.trim()}` : 'API endpoint set to relative default.');
+        setTimeout(() => location.reload(), 800);
+      }
+    }
+
     let currentCaseData = null;
     let rawHeadersCache = '';
     let map = null;
@@ -1173,7 +1198,7 @@
       formData.append('file', file);
 
       try {
-        const response = await fetch('/api/analyze', {
+        const response = await fetch(`${API_BASE}/api/analyze`, {
           method: 'POST',
           body: formData
         });
@@ -1198,7 +1223,7 @@
 
       uploadLoader.classList.remove('hidden');
       try {
-        const response = await fetch('/api/analyze-text', {
+        const response = await fetch(`${API_BASE}/api/analyze-text`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ raw_text: rawText, filename: 'stream_input.eml' })
@@ -1217,7 +1242,7 @@
     async function loadSample(sampleType) {
       uploadLoader.classList.remove('hidden');
       try {
-        const response = await fetch(`/api/sample/${sampleType}`);
+        const response = await fetch(`${API_BASE}/api/sample/${sampleType}`);
         if (!response.ok) throw new Error('Failed to retrieve case: ' + response.statusText);
         const data = await response.json();
         renderAnalysis(data);
@@ -1932,7 +1957,7 @@
 
       showToast('Generating official forensic PDF report...');
       try {
-        const response = await fetch(`/api/report/pdf/${currentCaseData.case_id}?download=true`);
+        const response = await fetch(`${API_BASE}/api/report/pdf/${currentCaseData.case_id}?download=true`);
         if (!response.ok) throw new Error('Failed to generate PDF report');
         
         const blob = await response.blob();
@@ -1959,7 +1984,7 @@
         alert('Please analyze an email first before previewing the PDF report.');
         return;
       }
-      window.open(`/api/report/pdf/${currentCaseData.case_id}`, '_blank');
+      window.open(`${API_BASE}/api/report/pdf/${currentCaseData.case_id}`, '_blank');
     }
 
     // ==========================================
@@ -2079,7 +2104,7 @@
       const container = document.getElementById('historyCasesList');
       container.innerHTML = '<div class="text-xs text-slate-400 font-mono">Querying sqlite archive...</div>';
       try {
-        const res = await fetch('/api/cases?limit=25');
+        const res = await fetch(`${API_BASE}/api/cases?limit=25`);
         const cases = await res.json();
         container.innerHTML = '';
         if (cases.length === 0) {
@@ -2090,7 +2115,7 @@
           const div = document.createElement('div');
           div.className = 'p-3 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-800 cursor-pointer transition flex justify-between items-center';
           div.onclick = async () => {
-            const caseRes = await fetch(`/api/cases/${c.case_id}`);
+            const caseRes = await fetch(`${API_BASE}/api/cases/${c.case_id}`);
             const fullCase = await caseRes.json();
             renderAnalysis(fullCase);
             toggleHistoryDrawer();
