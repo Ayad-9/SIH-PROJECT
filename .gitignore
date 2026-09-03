@@ -1,6 +1,7 @@
 # Node / Frontend
 node_modules/
 dist/
+dist_*/
 dist-ssr/
 *.local
 .npm
@@ -11,6 +12,7 @@ __pycache__/
 *.py[cod]
 *.class
 *.so
+*.pyd
 .Python
 env/
 venv/
@@ -34,11 +36,12 @@ venv.bak/
 *.sqlite
 *.sqlite3
 
-# AWS Lambda Build Artifacts
-build_lambda/
+# AWS Lambda Build Artifacts & Temporary Packages
+build_*/
+temp_*/
+build_lambda*/
 *.zip
 
 # OS files
 .DS_Store
 Thumbs.db
-
