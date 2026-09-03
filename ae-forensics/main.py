@@ -133,6 +133,7 @@ def run_full_forensic_pipeline(raw_bytes: bytes, filename: str = "", db_path: Op
     case_id = str(uuid.uuid4())
     case_record = {
         "case_id": case_id,
+        "filename": filename or parsed.get("filename") or "evidence_email.eml",
         "sha256": parsed["sha256"],
         "subject": parsed["subject"],
         "sender": parsed["from"],
