@@ -44,9 +44,9 @@ def build_zip():
         "--no-compile"
     ])
 
-    # 3. Download Linux x86_64 binaries for native dependencies
+    # 3. Download Linux x86_64 binaries for native dependencies with exact matching versions
     print("\n[2/4] Downloading Amazon Linux 64-bit native binary wheels...")
-    linux_native_pkgs = ["cryptography", "cffi", "pydantic-core", "pycparser"]
+    linux_native_pkgs = ["cryptography", "cffi", "pydantic-core==2.46.5", "pycparser"]
     subprocess.check_call([
         sys.executable, "-m", "pip", "download",
         *linux_native_pkgs,
