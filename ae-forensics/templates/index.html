@@ -1194,19 +1194,32 @@
     async function handleFileUpload(file) {
       if (!file) return;
       uploadLoader.classList.remove('hidden');
-      const formData = new FormData();
-      formData.append('file', file);
 
       try {
-        const response = await fetch(`${API_BASE}/api/analyze`, {
+        // Read RFC-822 / EML stream directly in browser for fast, universal JSON transport
+        const fileContent = await file.text();
+
+        const response = await fetch(`${API_BASE}/api/analyze-text`, {
           method: 'POST',
-          body: formData
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            raw_text: fileContent,
+            filename: file.name || 'uploaded_evidence.eml'
+          })
         });
-        if (!response.ok) throw new Error('Analysis request failed: ' + response.statusText);
+
+        if (!response.ok) {
+          const errBody = await response.text();
+          throw new Error(`Analysis failed (${response.status}): ${errBody || response.statusText}`);
+        }
+
         const data = await response.json();
         renderAnalysis(data);
-        showToast('Forensic evaluation pipeline complete.');
+        showToast(`Forensic docket compiled for ${file.name || 'uploaded file'}`);
       } catch (err) {
+        console.error('File evaluation error:', err);
         alert('Analysis Error: ' + err.message);
       } finally {
         uploadLoader.classList.add('hidden');
