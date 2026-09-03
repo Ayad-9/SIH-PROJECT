@@ -1033,8 +1033,9 @@
 
   <!-- Application Logic Scripts -->
   <script>
-    // Dynamic Backend Base URL (allows AWS Amplify to talk to AWS Lambda Function URL or API Gateway)
-    const API_BASE = (window.__API_BASE__ || localStorage.getItem('AE_API_BASE') || '').replace(/\/+$/, '');
+    // Default Production Lambda Endpoint (auto-routes for any device on AWS Amplify)
+    const DEFAULT_LAMBDA_URL = 'https://ynahh3ednyx2ot3olmkgt6ctau0aoyxx.lambda-url.ap-southeast-2.on.aws';
+    const API_BASE = (window.__API_BASE__ || localStorage.getItem('AE_API_BASE') || (location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? '' : DEFAULT_LAMBDA_URL)).replace(/\/+$/, '');
 
     function configureApiBase() {
       const current = localStorage.getItem('AE_API_BASE') || '';
