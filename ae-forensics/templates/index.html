@@ -526,15 +526,15 @@
         </div>
       </section>
 
-      <!-- Transmission Geolocation Map Section (High-Resolution 16:9 Aspect Ratio) -->
-      <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
+      <!-- Transmission Geolocation Map Section (Calibrated Proportions & Full Responsiveness) -->
+      <section class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 space-y-3.5 shadow-sm">
         
         <!-- Map Header & Top Controls -->
         <div class="flex flex-wrap justify-between items-center gap-3">
           <div>
             <div class="flex items-center gap-2">
               <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></div>
-              <h3 class="text-base sm:text-lg font-black text-white">Transmission Route &amp; Server Geolocation Map</h3>
+              <h3 class="text-sm sm:text-base font-black text-white">Transmission Route &amp; Server Geolocation Map</h3>
               <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-blue-300 border border-slate-700 font-mono">
                 Interactive Leaflet
               </span>
@@ -545,32 +545,32 @@
           </div>
 
           <!-- Action Controls in Map Header -->
-          <div class="flex items-center gap-2.5 flex-wrap">
+          <div class="flex items-center gap-2 flex-wrap">
             
             <!-- Free Map Providers Switcher -->
             <div class="flex items-center bg-slate-950 rounded-xl p-0.5 border border-slate-800 text-xs font-bold font-mono shadow-inner">
-              <button onclick="setMapLayer('osm')" id="btnLayerOsm" class="px-2.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-xs font-bold transition">
+              <button onclick="setMapLayer('osm')" id="btnLayerOsm" class="px-2 sm:px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-xs font-bold transition text-[11px] sm:text-xs">
                 OSM (Free)
               </button>
-              <button onclick="setMapLayer('esri')" id="btnLayerEsri" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
+              <button onclick="setMapLayer('esri')" id="btnLayerEsri" class="px-2 sm:px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition text-[11px] sm:text-xs">
                 Esri Streets
               </button>
-              <button onclick="setMapLayer('satellite')" id="btnLayerSatellite" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
+              <button onclick="setMapLayer('satellite')" id="btnLayerSatellite" class="px-2 sm:px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition text-[11px] sm:text-xs">
                 Satellite
               </button>
-              <button onclick="setMapLayer('voyager')" id="btnLayerVoyager" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
+              <button onclick="setMapLayer('voyager')" id="btnLayerVoyager" class="px-2 sm:px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition text-[11px] sm:text-xs">
                 Voyager
               </button>
             </div>
 
             <!-- Fit Route -->
-            <button onclick="resetMapView()" class="text-xs px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700 hover:border-blue-500/40 transition font-bold shadow-xs cursor-pointer" title="Fit map view to include all hops">
+            <button onclick="resetMapView()" class="text-xs px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700 hover:border-blue-500/40 transition font-bold shadow-xs cursor-pointer" title="Fit map view to include all hops">
               Fit Route
             </button>
 
             <!-- Dedicated Explore Screen Button (Highlighted) -->
-            <button onclick="openMapModal()" class="text-xs sm:text-sm px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black flex items-center gap-2 shadow-lg shadow-blue-900/40 ring-2 ring-blue-400/30 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button onclick="openMapModal()" class="text-xs sm:text-sm px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black flex items-center gap-1.5 sm:gap-2 shadow-md shadow-blue-900/40 ring-2 ring-blue-400/30 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer">
+              <svg class="w-3.5 sm:w-4 h-3.5 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
               </svg>
               <span>Explore Map Freely</span>
@@ -579,36 +579,36 @@
         </div>
 
         <!-- Interactive Hop Navigation Pills -->
-        <div id="hopPillsContainer" class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+        <div id="hopPillsContainer" class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs whitespace-nowrap">
           <!-- Hop buttons inserted dynamically -->
         </div>
 
-        <!-- High-Resolution Map Container (Balanced 380px Aspect Ratio) -->
-        <div id="mapWrapper" class="relative rounded-2xl overflow-hidden border border-slate-800 shadow-xl bg-slate-950 transition-all">
+        <!-- High-Resolution Map Container (Calibrated 260px-280px Height for Single-Screen Viewing) -->
+        <div id="mapWrapper" class="relative rounded-2xl overflow-hidden border border-slate-800 shadow-lg bg-slate-950 transition-all">
           
           <!-- Map Canvas -->
-          <div id="map" class="h-[320px] sm:h-[380px] md:h-[420px] w-full z-0"></div>
+          <div id="map" class="h-[220px] sm:h-[260px] md:h-[280px] w-full z-0"></div>
 
           <!-- On-Map Zoom Controls (+ and - INSIDE the map screen, top-right) -->
-          <div class="absolute top-3 right-3 z-20 flex flex-col gap-1.5 shadow-md">
-            <button onclick="zoomInMap()" title="Zoom in (+)" class="w-8 h-8 rounded-xl bg-slate-900/95 hover:bg-slate-800 text-white border border-slate-700 font-black text-base flex items-center justify-center transition shadow-md active:scale-95 cursor-pointer">
+          <div class="absolute top-2.5 right-2.5 z-20 flex flex-col gap-1 shadow-md">
+            <button onclick="zoomInMap()" title="Zoom in (+)" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-slate-900/95 hover:bg-slate-800 text-white border border-slate-700 font-black text-sm sm:text-base flex items-center justify-center transition shadow-md active:scale-95 cursor-pointer">
               +
             </button>
-            <button onclick="zoomOutMap()" title="Zoom out (-)" class="w-8 h-8 rounded-xl bg-slate-900/95 hover:bg-slate-800 text-white border border-slate-700 font-black text-base flex items-center justify-center transition shadow-md active:scale-95 cursor-pointer">
+            <button onclick="zoomOutMap()" title="Zoom out (-)" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-slate-900/95 hover:bg-slate-800 text-white border border-slate-700 font-black text-sm sm:text-base flex items-center justify-center transition shadow-md active:scale-95 cursor-pointer">
               &minus;
             </button>
           </div>
 
           <!-- On-Map "Open Interactive Screen" Button (Prominently Highlighted, top-left) -->
-          <div class="absolute top-3 left-3 z-20">
-            <button onclick="openMapModal()" class="px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shadow-lg shadow-blue-950/80 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/50 ring-2 ring-blue-500/20 active:scale-95 cursor-pointer">
-              <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+          <div class="absolute top-2.5 left-2.5 z-20">
+            <button onclick="openMapModal()" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-black transition-all flex items-center gap-1.5 shadow-lg shadow-blue-950/80 bg-blue-600 hover:bg-blue-500 text-white border border-blue-400/50 ring-2 ring-blue-500/20 active:scale-95 cursor-pointer">
+              <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
               <span>Open Interactive Screen ↗</span>
             </button>
           </div>
 
           <!-- On-Map Legend & Status Helper (Bottom-left) -->
-          <div class="absolute bottom-3 left-3 z-20 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[11px] font-mono text-slate-200 flex items-center gap-3 pointer-events-none border border-slate-800 shadow-lg">
+          <div class="hidden sm:flex absolute bottom-2.5 left-2.5 z-20 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[11px] font-mono text-slate-200 items-center gap-3 pointer-events-none border border-slate-800 shadow-lg">
             <div class="flex items-center gap-1.5">
               <span class="w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-rose-500/30"></span>
               <span class="font-bold text-white">Origin IP</span>
@@ -635,17 +635,17 @@
       </section>
 
       <!-- Chronological Transmission Relay Chain Table -->
-      <section class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3 shadow-sm">
+      <section class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-3 shadow-sm">
         <div class="flex justify-between items-center flex-wrap gap-2">
           <div>
-            <h3 class="text-sm font-black text-white uppercase font-mono">SMTP Transmission Relay Sequence</h3>
+            <h3 class="text-xs sm:text-sm font-black text-white uppercase font-mono">SMTP Transmission Relay Sequence</h3>
             <p class="text-xs text-slate-400 font-medium">Chronological hop chain reconstructed from RFC Received headers (physical origin to destination MX).</p>
           </div>
           <span class="text-xs font-mono font-semibold text-blue-400">Click any row to inspect hop on map</span>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs font-mono">
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="w-full text-left text-xs font-mono whitespace-nowrap">
             <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold border-b border-slate-800">
               <tr>
                 <th class="py-2.5 px-3">Hop</th>
@@ -658,7 +658,7 @@
               </tr>
             </thead>
             <tbody id="hopsTableBody" class="divide-y divide-slate-800 text-slate-200 font-medium">
-              <!-- Rendered rows -->
+              <!-- Hops injected dynamically -->
             </tbody>
           </table>
         </div>
